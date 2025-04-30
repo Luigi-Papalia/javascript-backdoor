@@ -15,6 +15,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Clean Minikube
+        run: minikube delete
+      
       - name: Start Minikube
         uses: medyagh/setup-minikube@latest
         with:
