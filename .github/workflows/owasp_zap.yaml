@@ -15,8 +15,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Clean Minikube
-        run: minikube delete
+      - name: Clean Minikube and Docker cache
+        run: |
+          minikube delete
+          docker system prune -a -f
+          rm -rf ~/.kube ~/.minikube
       
       - name: Start Minikube
         uses: medyagh/setup-minikube@latest
