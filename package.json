@@ -1,0 +1,19 @@
+{
+  "name": "javascript",
+  "version": "1.0.0",
+  "description": "This is a bad package.json, for testing purposes only",
+  "main": "index.js",
+  "author": "Luigi Papalia",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "dependencies": {
+    "@my/dependency": "file:./harmless",
+    "express": "^5.1.0",
+    "express-session": "^1.18.1",
+    "lodash": "4.17.20",
+    "sqlite3": "^5.1.7"
+  },
+  "license": "ISC"
+}

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vulnerable Microservice Usage</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .endpoint {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+        .vulnerability {
+            color: red;
+            font-weight: bold;
+        }
+        .attack-example {
+            background-color: #f0f0f0;
+            padding: 5px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Vulnerable JavaScript Microservice</h1>
+    <p>This page explains how to use the intentionally vulnerable endpoints of this microservice and demonstrates potential attacks.</p>
+
+    <div class="endpoint">
+        <h2>/greet</h2>
+        <p>This endpoint accepts a 'name' parameter via a query string and displays it in the HTML output.</p>
+        <p class="vulnerability">Vulnerability: Cross-Site Scripting (XSS)</p>
+        <h3>Usage</h3>
+        <p>Access the endpoint with a name parameter:</p>
+        <p class="attack-example"><code>/greet?name=YourName</code></p>
+        <h3>Attack Example</h3>
+        <p>Inject JavaScript code to execute in the user's browser:</p>
+        <p class="attack-example"><code>/greet?name=&lt;script&gt;alert('XSS Attack!')&lt;/script&gt;</code></p>
+    </div>
+
+    <div class="endpoint">
+        <h2>/calculate</h2>
+        <p>This endpoint evaluates a mathematical expression provided in the 'expr' parameter via a query string.</p>
+        <p class="vulnerability">Vulnerability: Code Injection</p>
+        <h3>Usage</h3>
+        <p>Access the endpoint with an expression parameter:</p>
+        <p class="attack-example"><code>/calculate?expr=2+2</code></p>
+        <h3>Attack Example</h3>
+        <p>Execute arbitrary JavaScript code on the server:</p>
+        <p class="attack-example"><code>/calculate?expr=process.exit(1)</code></p>
+    </div>
+
+    <p><b>Disclaimer:</b> This microservice is intentionally vulnerable for demonstration purposes. Do not deploy this code in a production environment.</p>
+</body>
+</html>

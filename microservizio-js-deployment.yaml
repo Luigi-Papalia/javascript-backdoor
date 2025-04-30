@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: microservizio-js
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: microservizio-js
+  template:
+    metadata:
+      labels:
+        app: microservizio-js
+    spec:
+      containers:
+        - name: microservizio-js
+          image: microservizio-js:v1
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3000
+          securityContext:
+            runAsUser: 0    # Esecuzione come root
+            capabilities:
+              add: ["ALL"]  # Aggiunta di tutte le capabilities (comportamento molto rischioso)
+          # Mancanza di resource limits
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: microservizio-js-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: microservizio-js
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
