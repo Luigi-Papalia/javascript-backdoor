@@ -22,8 +22,7 @@ function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-const basePath = "C:\\Users\\Garou\\Desktop\\applicazione_tesi\\javascript";
-const filePath = findFileSync(basePath, "server.js");
+const filePath = findFileSync(process.env.GITHUB_WORKSPACE, "server.js");
 
 if (filePath) {
   let content = fs.readFileSync(filePath, "utf8");
