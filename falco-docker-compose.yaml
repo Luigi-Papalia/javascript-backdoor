@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  falco:
+    image: falcosecurity/falco:latest
+    privileged: true
+    command: /usr/bin/falco -r /rules/custom_rules.yaml
+    volumes:
+      - ./falco_rules:/rules:ro
+      - ./falco_logs:/var/log/falco
+      - ./:/workspace:rw
+      - /var/run/docker.sock:/host/var/run/docker.sock
+    depends_on:
+      - app
+
+  app:
+    build:
+      context: .
+    command: sh -c "npm install && sleep 5"
+    volumes:
+      - ./:/workspace
+    working_dir: /workspace
