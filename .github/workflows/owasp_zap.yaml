@@ -35,7 +35,19 @@ jobs:
         run: |
           kubectl apply -f microservizio-js-deployment.yaml
           kubectl rollout status deployment/microservizio-js --timeout=120s
+      
+      - name: Debug - Pod and Service status
+        run: |
+          kubectl get pods -o wide
+          kubectl get svc
+          kubectl describe svc microservizio-js-service
+          kubectl describe pod $(kubectl get pods -o name | grep microservizio-js | head -n1)
 
+      - name: Port-forward for ZAP
+        run: |
+          kubectl port-forward svc/microservizio-js-service 8080:3000 &
+          sleep 10
+      
       - name: Get Minikube IP
         id: minikube-ip
         run: |
