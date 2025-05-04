@@ -20,7 +20,7 @@ jobs:
           sudo apt-get install -y docker-compose
 
       - name: Run build with Falco monitoring
-        run: docker-compose up --abort-on-container-exit
+        run: docker-compose -f falco-docker-compose.yaml up --abort-on-container-exit
 
       - name: Upload Falco logs
         uses: actions/upload-artifact@v4
