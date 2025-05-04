@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Docker and Docker Compose
         run: |
@@ -23,7 +23,7 @@ jobs:
         run: docker-compose up --abort-on-container-exit
 
       - name: Upload Falco logs
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: falco-logs
           path: ./falco_logs
