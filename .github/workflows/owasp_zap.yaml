@@ -7,13 +7,13 @@ on:
 permissions:
   contents: write
   issues: write
-  security-events: write
 
 jobs:
-  zap:
+  build-deploy-zap:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Start Minikube
         uses: medyagh/setup-minikube@latest
@@ -25,12 +25,14 @@ jobs:
           memory: 4096m
           start-args: '--wait=apiserver'
 
-      - name: Set up the microservice
+      - name: Build Docker image in Minikube
         run: |
           eval $(minikube -p minikube docker-env)
-          export DOCKER_BUILDKIT=0
-          minikube tunnel &
           docker build -t microservizio-js:v1 .
+          docker images
+
+      - name: Deploy to Minikube
+        run: |
           kubectl apply -f microservizio-js-deployment.yaml
           kubectl rollout status deployment/microservizio-js --timeout=120s
           for i in {1..30}; do
@@ -45,26 +47,41 @@ jobs:
       - name: Get Minikube IP
         id: minikube-ip
         run: |
-          MINIKUBE_IP=$(minikube ip)
-          echo "MINIKUBE_IP=$MINIKUBE_IP" >> $GITHUB_ENV
-          echo "Minikube IP is: $MINIKUBE_IP"
+          echo "MINIKUBE_IP=$(minikube ip)" >> $GITHUB_ENV
 
-      - name: Run ZAP Full Scan with Minikube IP
+      - name: Wait for service to be available
+        run: |
+          for i in {1..30}; do
+            if curl -s "http://$MINIKUBE_IP:30000" >/dev/null; then
+              echo "Service is up!"
+              exit 0
+            fi
+            echo "Waiting for service to be available..."
+            sleep 5
+          done
+          echo "Service did not become available in time." >&2
+          exit 1
+
+      - name: Run OWASP ZAP Full Scan
+        id: zap_scan
+        continue-on-error: true
         run: |
           docker run --rm --network=host \
-          -v $(pwd):/zap/wrk:rw \
-          ghcr.io/zaproxy/zaproxy:stable \
-          zap-full-scan.py -t http://192.168.49.2:30000 -a
+            -v $(pwd):/zap/wrk:rw \
+            ghcr.io/zaproxy/zaproxy:stable \
+            zap-full-scan.py -t http://$MINIKUBE_IP:30000 -a -r zap_report.html
+          echo "ZAP_EXIT_CODE=$?" >> $GITHUB_ENV
 
       - name: Create GitHub Issue if Vulnerabilities Found
-        if: failure()  # This only runs if the ZAP scan fails (i.e., finds vulnerabilities)
+        if: env.ZAP_EXIT_CODE != '0'
         run: |
+          BODY=$(cat zap_report.html | base64)
           curl -X POST \
             -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -d '{"title":"ZAP Security Issues Detected","body":"ZAP Full Scan detected vulnerabilities on the microservice."}' \
+            -d "{\"title\":\"ZAP Security Issues Detected\",\"body\":\"ZAP Full Scan detected vulnerabilities on the microservice. See attached report (base64-encoded):\n\n$BODY\"}" \
             https://api.github.com/repos/${{ github.repository }}/issues
-          
+
       - name: Cleanup
         if: always()
         run: |
-          kubectl delete -f microservizio-js-deployment.yaml
+          kubectl delete -f microservizio-js-deployment.yaml || true
