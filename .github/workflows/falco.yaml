@@ -4,35 +4,47 @@ on:
   repository_dispatch:
     types: [falco-detection]
 
-permissions:
-  security-events: write
-
 jobs:
-  detect-supply-chain-attack:
+  falco-security-detection:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Start Falco
+      uses: falcosecurity/falco-actions/start@latest
+      with:
+        mode: analyze
+        
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Set up Docker and Docker Compose
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y docker-compose
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Run build with Falco monitoring
-        run: docker-compose -f falco-docker-compose.yaml up --abort-on-container-exit
+    - name: Build Docker image
+      run: docker build -t ghcr.io/${{ github.repository_owner }}/my-image:latest .
 
-      - name: Upload Falco logs
-        uses: actions/upload-artifact@v4
-        with:
-          name: falco-logs
-          path: ./falco_logs
+    - name: Push Docker image to GHCR
+      run: docker push ghcr.io/${{ github.repository_owner }}/my-image:latest    
+   
 
-      - name: Check for Falco alerts
-        run: |
-          if grep -q "Suspicious" ./falco_logs/falco.log; then
-            echo "Falco detected suspicious behavior"
-            exit 1
-          else
-            echo "No suspicious activity detected"
-          fi
+    - name: Stop Falco
+      uses: falcosecurity/falco-actions/stop@latest
+      with:
+        mode: analyze
+  
+  analyze-falco-security:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    steps:
+    - name: Analyze
+      uses: falcosecurity/falco-actions/analyze@latest
+      with:
+        falco-version: '0.39.0'
