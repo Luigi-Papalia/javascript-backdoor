@@ -35,26 +35,34 @@ jobs:
         run: |
           kubectl apply -f microservizio-js-deployment.yaml
           kubectl rollout status deployment/microservizio-js --timeout=120s
+
+      - name: Start Minikube tunnel in background
+        run: |
+          sudo nohup minikube tunnel > /tmp/tunnel.log 2>&1 &
+          sleep 5
+
+      - name: Wait for EXTERNAL-IP
+        id: wait_external_ip
+        run: |
           for i in {1..30}; do
-            if kubectl get svc microservizio-js-service; then
-              echo "Service is ready."
+            EXTERNAL_IP=$(kubectl get svc microservizio-js-service -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+            if [[ ! -z "$EXTERNAL_IP" ]]; then
+              echo "EXTERNAL_IP=$EXTERNAL_IP" >> $GITHUB_ENV
+              echo "External IP assigned: $EXTERNAL_IP"
               break
             fi
-            echo "Waiting for service..."
+            echo "Waiting for external IP..."
             sleep 5
           done
-          minikube tunnel &
-          kubectl get svc microservizio-js-service
-
-      - name: Get Minikube IP
-        id: minikube-ip
-        run: |
-          echo "MINIKUBE_IP=$(minikube ip)" >> $GITHUB_ENV
+          if [[ -z "$EXTERNAL_IP" ]]; then
+            echo "EXTERNAL-IP not assigned in time." >&2
+            exit 1
+          fi
 
       - name: Wait for service to be available
         run: |
-          for i in {1..5}; do
-            if curl -s http://192.168.49.2:30000 >/dev/null; then
+          for i in {1..10}; do
+            if curl -s http://$EXTERNAL_IP:3000 >/dev/null; then
               echo "Service is up!"
               exit 0
             fi
@@ -71,7 +79,7 @@ jobs:
           docker run --rm --network=host \
             -v $(pwd):/zap/wrk:rw \
             ghcr.io/zaproxy/zaproxy:stable \
-            zap-full-scan.py -t http://$MINIKUBE_IP:30000 -a -r zap_report.html
+            zap-full-scan.py -t http://$EXTERNAL_IP:3000 -a -r zap_report.html
           echo "ZAP_EXIT_CODE=$?" >> $GITHUB_ENV
 
       - name: Create GitHub Issue if Vulnerabilities Found
