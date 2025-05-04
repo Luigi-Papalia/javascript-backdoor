@@ -1,4 +1,4 @@
-name: Falco Supply Chain Attack Detection
+name: Falco Detection
 
 on:
     workflow_dispatch:
