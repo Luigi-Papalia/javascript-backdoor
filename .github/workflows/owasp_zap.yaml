@@ -36,13 +36,6 @@ jobs:
           kubectl apply -f microservizio-js-deployment.yaml
           kubectl rollout status deployment/microservizio-js --timeout=120s
 
-      - name: Debug - Pod and Service status
-        run: |
-          kubectl get pods -o wide
-          kubectl get svc
-          kubectl describe svc microservizio-js-service
-          kubectl describe $(kubectl get pods -o name | grep microservizio-js | head -n1)
-
       - name: Start port-forward in background
         run: |
           kubectl port-forward svc/microservizio-js-service 3000:3000 > port-forward.log 2>&1 &
