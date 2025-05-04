@@ -43,7 +43,7 @@ jobs:
             echo "Waiting for service..."
             sleep 5
           done
-          kubectl service microservizio-js-service
+          minikube tunnel
           kubectl get svc microservizio-js-service
 
       - name: Get Minikube IP
