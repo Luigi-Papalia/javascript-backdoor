@@ -22,6 +22,7 @@ jobs:
           cni: bridge
           container-runtime: containerd
           cpus: 2
+          cache: false
           memory: 4096m
           start-args: '--wait=apiserver'
 
@@ -45,6 +46,7 @@ jobs:
         id: service-url
         run: |
           echo "SERVICE_URL=$(minikube service microservizio-js-service --url)" >> $GITHUB_ENV
+          echo $GITHUB_ENV
 
       - name: ZAP Full Scan
         uses: zaproxy/action-full-scan@v0.12.0
