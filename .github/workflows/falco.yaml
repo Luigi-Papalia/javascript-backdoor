@@ -2,7 +2,6 @@ name: Falco Supply Chain Attack Detection
 
 on:
   repository_dispatch:
-    types: [falco-detection]
 
 jobs:
   falco-security-detection:
