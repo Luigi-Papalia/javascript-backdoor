@@ -20,7 +20,7 @@ jobs:
         with:
           driver: docker
           cni: bridge
-          container-runtime: containerd
+          container-runtime: docker
           cpus: 2
           memory: 4096m
           start-args: '--wait=apiserver'
@@ -35,6 +35,7 @@ jobs:
         run: |
           kubectl apply -f microservizio-js-deployment.yaml
           kubectl rollout status deployment/microservizio-js --timeout=120s
+          minikube service microservizio-js --url
           for i in {1..30}; do
             if kubectl get svc microservizio-js-service; then
               echo "Service is ready."
