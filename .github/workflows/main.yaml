@@ -39,3 +39,12 @@ jobs:
 #        with:
 #          token: ${{ secrets.REPO_ACCESS_TOKEN }}
 #          event-type: iac-trivy
+
+trigger-falco:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Falco
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          event-type: falco-detection
