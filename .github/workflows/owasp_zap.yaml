@@ -44,6 +44,7 @@ jobs:
             sleep 5
           done
           minikube service microservizio-js-service --url
+          kubectl get svc microservizio-js-service
 
       - name: Get Minikube IP
         id: minikube-ip
@@ -53,7 +54,7 @@ jobs:
       - name: Wait for service to be available
         run: |
           for i in {1..30}; do
-            if curl -s "http://$MINIKUBE_IP:30000" >/dev/null; then
+            if curl -s http://192.168.49.2:30000 >/dev/null; then
               echo "Service is up!"
               exit 0
             fi
