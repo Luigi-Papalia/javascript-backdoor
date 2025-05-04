@@ -13,14 +13,14 @@ jobs:
 #          token: ${{ secrets.REPO_ACCESS_TOKEN }}
 #          event-type: sca-snyk
 
-  trigger-sast:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Trigger SAST (Semgrep)
-        uses: peter-evans/repository-dispatch@v3
-        with:
-          token: ${{ secrets.REPO_ACCESS_TOKEN }}
-          event-type: sast-semgrep
+#  trigger-sast:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Trigger SAST (Semgrep)
+#        uses: peter-evans/repository-dispatch@v3
+#        with:
+#          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+#          event-type: sast-semgrep
 
 #  trigger-dast:
 #    runs-on: ubuntu-latest
