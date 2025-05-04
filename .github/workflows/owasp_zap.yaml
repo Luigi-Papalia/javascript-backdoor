@@ -29,6 +29,7 @@ jobs:
         run: |
           eval $(minikube -p minikube docker-env)
           export DOCKER_BUILDKIT=0
+          minikube tunnel &
           docker build -t microservizio-js:v1 .
           kubectl apply -f microservizio-js-deployment.yaml
           kubectl rollout status deployment/microservizio-js --timeout=120s
@@ -47,20 +48,6 @@ jobs:
           MINIKUBE_IP=$(minikube ip)
           echo "MINIKUBE_IP=$MINIKUBE_IP" >> $GITHUB_ENV
           echo "Minikube IP is: $MINIKUBE_IP"
-
-      - name: Port forward microservice
-        run: minikube tunnel &
-
-      - name: Wait for service to be ready
-        run: |
-          for i in {1..30}; do
-            if curl -s http://192.168.49.2:30000 > /dev/null; then
-              echo "Service is up!"
-              break
-            fi
-            echo "Waiting for service..."
-            sleep 2
-          done
 
       - name: Run ZAP Full Scan with Minikube IP
         run: |
