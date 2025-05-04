@@ -97,6 +97,6 @@ app.get('/calculate', (req, res) => {
     }
 });
 
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
     console.log(`Bad microservice running on port ${port}`);
 });
