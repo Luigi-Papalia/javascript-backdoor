@@ -67,7 +67,7 @@ jobs:
           docker run --rm --network=host \
             -v $(pwd):/zap/wrk:rw \
             ghcr.io/zaproxy/zaproxy:stable \
-            zap-full-scan.py -t http://$MINIKUBE_IP:3000 -a
+            zap-full-scan.py -t http://$MINIKUBE_IP:30000 -a
 
       - name: Create GitHub Issue if Vulnerabilities Found
         if: failure()  # This only runs if the ZAP scan fails (i.e., finds vulnerabilities)
