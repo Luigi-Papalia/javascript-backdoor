@@ -29,7 +29,7 @@ kind: Service
 metadata:
   name: microservizio-js-service
 spec:
-  type: NodePort
+  type: LoadBalancer
   selector:
     app: microservizio-js
   ports:
