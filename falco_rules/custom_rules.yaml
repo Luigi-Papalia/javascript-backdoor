@@ -1,0 +1,13 @@
+- rule: Unexpected File Write During Package Install
+  desc: Detects if any source file in the repo is modified during install/build
+  condition: >
+    open_write and
+    fd.name startswith "/workspace" and
+    fd.type = "file" and
+    (proc.name in (npm, node, bash, sh, yarn)) and
+    not fd.name contains "/node_modules/" and
+    not fd.name endswith (".log", ".lock", ".json")
+  output: >
+    Suspicious write by '{{proc.name}}' to '{{fd.name}}' during build/install
+  priority: WARNING
+  tags: [supply-chain, js, build]
