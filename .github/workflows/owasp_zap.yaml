@@ -41,11 +41,13 @@ jobs:
             sleep 5
           done
 
-      #- name: Get Service URL
-      #  id: service-url
-      #  run: |
-      #    echo "SERVICE_URL=$(minikube service microservizio-js-service --url)" >> $GITHUB_ENV
-      #    echo $GITHUB_ENV
+      - name: Get Minikube IP
+        id: minikube-ip
+        run: |
+          MINIKUBE_IP=$(minikube ip)
+          echo "MINIKUBE_IP=$MINIKUBE_IP" >> $GITHUB_ENV
+          echo "Minikube IP is: $MINIKUBE_IP"
+
       - name: Port forward microservice
         run: kubectl port-forward service/microservizio-js-service 3000:3000 &
 
@@ -59,19 +61,22 @@ jobs:
             echo "Waiting for service..."
             sleep 2
           done
-      
-      - name: Run ZAP Full Scan Manually with Host Network
+
+      - name: Run ZAP Full Scan with Minikube IP
         run: |
           docker run --rm --network=host \
             -v $(pwd):/zap/wrk:rw \
             ghcr.io/zaproxy/zaproxy:stable \
-            zap-full-scan.py -t http://localhost:3000 -a
+            zap-full-scan.py -t http://$MINIKUBE_IP:3000 -a
 
-      - name: Upload ZAP Report
-        uses: actions/upload-artifact@v4
-        with:
-          path: zap-report.html
-
+      - name: Create GitHub Issue if Vulnerabilities Found
+        if: failure()  # This only runs if the ZAP scan fails (i.e., finds vulnerabilities)
+        run: |
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -d '{"title":"ZAP Security Issues Detected","body":"ZAP Full Scan detected vulnerabilities on the microservice."}' \
+            https://api.github.com/repos/${{ github.repository }}/issues
+          
       - name: Cleanup
         if: always()
         run: |
