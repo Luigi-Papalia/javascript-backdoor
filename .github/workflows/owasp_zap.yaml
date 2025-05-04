@@ -35,7 +35,7 @@ jobs:
         run: |
           kubectl apply -f microservizio-js-deployment.yaml
           kubectl rollout status deployment/microservizio-js --timeout=120s
-          minikube service service/microservizio-js --url
+          minikube service service/microservizio-js-service --url
           for i in {1..30}; do
             if kubectl get svc microservizio-js-service; then
               echo "Service is ready."
