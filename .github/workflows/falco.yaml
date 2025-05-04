@@ -12,7 +12,7 @@ jobs:
       actions: read
     steps:
     - name: Start Falco
-      uses: falcosecurity/falco-actions/start@latest
+      uses: falcosecurity/falco-actions/start
       with:
         mode: analyze
         
@@ -27,14 +27,14 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build Docker image
-      run: docker build -t ghcr.io/${{ github.repository_owner }}/my-image:latest .
+      run: docker build -t ghcr.io/${{ github.repository_owner }}/vulnerable-app:latest .
 
     - name: Push Docker image to GHCR
-      run: docker push ghcr.io/${{ github.repository_owner }}/my-image:latest    
+      run: docker push ghcr.io/${{ github.repository_owner }}/vulnerable-app:latest    
    
 
     - name: Stop Falco
-      uses: falcosecurity/falco-actions/stop@latest
+      uses: falcosecurity/falco-actions/stop
       with:
         mode: analyze
   
@@ -45,6 +45,6 @@ jobs:
       actions: read
     steps:
     - name: Analyze
-      uses: falcosecurity/falco-actions/analyze@latest
+      uses: falcosecurity/falco-actions/analyze
       with:
         falco-version: '0.39.0'
