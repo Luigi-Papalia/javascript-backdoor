@@ -49,12 +49,12 @@ jobs:
           echo "Minikube IP is: $MINIKUBE_IP"
 
       - name: Port forward microservice
-        run: kubectl port-forward service/microservizio-js-service 3000:3000 &
+        run: minikube tunnel &
 
       - name: Wait for service to be ready
         run: |
           for i in {1..30}; do
-            if curl -s http://192.168.49.2:3000 > /dev/null; then
+            if curl -s http://192.168.49.2:30000 > /dev/null; then
               echo "Service is up!"
               break
             fi
