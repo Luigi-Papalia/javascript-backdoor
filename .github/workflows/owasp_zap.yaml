@@ -36,27 +36,42 @@ jobs:
           kubectl apply -f microservizio-js-deployment.yaml
           kubectl rollout status deployment/microservizio-js --timeout=120s
 
-      - name: Port-forward for ZAP
+      - name: Debug - Pod and Service status
         run: |
-          kubectl port-forward svc/microservizio-js-service 8080:3000 &
-          sleep 10
-      
-      - name: Get Minikube IP
-        id: minikube-ip
+          kubectl get pods -o wide
+          kubectl get svc
+          kubectl describe svc microservizio-js-service
+          kubectl describe pod $(kubectl get pods -o name | grep microservizio-js | head -n1)
+
+      - name: Start port-forward in background
         run: |
-          echo "MINIKUBE_IP=$(minikube ip)" >> $GITHUB_ENV
+          kubectl port-forward svc/microservizio-js-service 8080:3000 > port-forward.log 2>&1 &
+          for i in {1..15}; do
+            if nc -z localhost 8080; then
+              echo "Port-forward is ready."
+              break
+            fi
+            echo "Waiting for port-forward to be ready..."
+            sleep 2
+          done
+          if ! nc -z localhost 8080; then
+            echo "Port-forward did not become ready in time."
+            cat port-forward.log
+            exit 1
+          fi
 
       - name: Wait for service to be available
         run: |
-          for i in {1..10}; do
-            if curl -s http://$MINIKUBE_IP:30000 >/dev/null; then
+          for i in {1..15}; do
+            if curl -s http://localhost:8080 >/dev/null; then
               echo "Service is up!"
               exit 0
             fi
             echo "Waiting for service to be available..."
-            sleep 5
+            sleep 2
           done
           echo "Service did not become available in time." >&2
+          cat port-forward.log
           exit 1
 
       - name: Run OWASP ZAP Full Scan
@@ -66,7 +81,7 @@ jobs:
           docker run --rm --network=host \
             -v $(pwd):/zap/wrk:rw \
             ghcr.io/zaproxy/zaproxy:stable \
-            zap-full-scan.py -t http://$MINIKUBE_IP:30000 -a -r zap_report.html
+            zap-full-scan.py -t http://localhost:8080 -a -r zap_report.html
           echo "ZAP_EXIT_CODE=$?" >> $GITHUB_ENV
 
       - name: Create GitHub Issue if Vulnerabilities Found
