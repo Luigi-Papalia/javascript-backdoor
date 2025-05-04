@@ -41,7 +41,7 @@ jobs:
           kubectl get pods -o wide
           kubectl get svc
           kubectl describe svc microservizio-js-service
-          kubectl describe pod $(kubectl get pods -o name | grep microservizio-js | head -n1)
+          kubectl describe $(kubectl get pods -o name | grep microservizio-js | head -n1)
 
       - name: Start port-forward in background
         run: |
