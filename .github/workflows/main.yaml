@@ -40,7 +40,7 @@ jobs:
 #          token: ${{ secrets.REPO_ACCESS_TOKEN }}
 #          event-type: iac-trivy
 
-trigger-falco:
+  trigger-falco:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Falco
