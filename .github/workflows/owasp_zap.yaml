@@ -22,7 +22,6 @@ jobs:
           cni: bridge
           container-runtime: containerd
           cpus: 2
-          cache: false
           memory: 4096m
           start-args: '--wait=apiserver'
 
