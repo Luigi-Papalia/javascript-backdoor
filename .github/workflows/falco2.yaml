@@ -3,6 +3,11 @@ on:
 
 name: Test Analyze Mode
 
+permissions:
+  packages: write
+  contents: read
+  actions: read
+
 jobs:
   test-falco:
     runs-on: ubuntu-latest
