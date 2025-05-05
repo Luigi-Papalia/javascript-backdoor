@@ -1,45 +1,52 @@
-name: Falco Detection 2
-
 on:
   workflow_dispatch:
 
-permissions:
-  packages: write
-  contents: read
-  actions: read
+name: Test Analyze Mode Custom Report
 
 jobs:
-  falco-security-detection:
+  test-falco:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       actions: read
     steps:
-      - name: Start Falco
-        uses: falcosecurity/falco-actions/start@e23d661998204b25988e4655899418e46924a68b
-        with:
-          mode: live
-          custom-rule-file: 'falco_rules/custom_rules.yaml'
-          verbose: true
+    - name: Checkout
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Start Falco
+      uses: falcosecurity/falco-actions/start@ddcff83af077b30af70f188ba7b5446c98041446
+      with:
+        mode: analyze
+        verbose: true
 
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}  # GitHub username (actor in the workflow)
-          password: ${{ secrets.DOCKER_REGISTRY_TOKEN }}  # Your PAT stored as a secret
+    - name: Overwrite Source Code
+      shell: bash
+      run: |
+        echo "pwned" > ${{ github.workspace }}/pwn.txt
+    
+    - name: Read Sensitive File
+      run: |
+        sleep 3
+        docker run --rm --privileged ubuntu cat /etc/shadow
+        sleep 3
 
-      - name: Build and Push Docker image
-        run: |
-          OWNER=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')
-          docker build -t ghcr.io/${OWNER}/vulnerable-app:latest .
-          docker push ghcr.io/${OWNER}/vulnerable-app:latest
+    - name: Stop Falco
+      uses: falcosecurity/falco-actions/stop@ddcff83af077b30af70f188ba7b5446c98041446
+      with:
+        mode: analyze
+        verbose: true
 
-      - name: Stop Falco
-        uses: falcosecurity/falco-actions/stop@e23d661998204b25988e4655899418e46924a68b
-        with:
-          mode: live
-          verbose: true
+  analyze:
+    runs-on: ubuntu-latest
+    needs: test-falco
+    permissions:
+      contents: read
+      actions: read
+    steps:
+    - name: Analyze
+      uses: falcosecurity/falco-actions/analyze@ddcff83af077b30af70f188ba7b5446c98041446
+      with:
+        falco-version: '0.39.0'
+        extract-written-files: true
+        extract-chisels: true
+        extract-hashes: true
