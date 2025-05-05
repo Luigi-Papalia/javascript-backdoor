@@ -27,9 +27,8 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
+          username: ${{ github.actor }}  # GitHub username (actor in the workflow)
+          password: ${{ secrets.DOCKER_REGISTRY_TOKEN }}  # Your PAT stored as a secret
 
       - name: Build and Push Docker image
         run: |
