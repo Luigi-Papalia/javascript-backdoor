@@ -25,14 +25,11 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Build Docker image
+    - name: Build and Push Docker image
       run: |
         OWNER=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')
         docker build -t ghcr.io/${OWNER}/vulnerable-app:latest .
-
-    - name: Push Docker image to GHCR
-      run: docker push ghcr.io/${{ github.repository_owner }}/vulnerable-app:latest    
-   
+        docker push ghcr.io/${OWNER}/vulnerable-app:latest   
 
     - name: Stop Falco
       uses: falcosecurity/falco-actions/stop@e23d661998204b25988e4655899418e46924a68b
