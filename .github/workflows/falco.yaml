@@ -46,6 +46,7 @@ jobs:
     permissions:
       contents: read
       actions: read
+    needs: falco-security-detection
     steps:
       - name: Analyze
         uses: falcosecurity/falco-actions/analyze@e23d661998204b25988e4655899418e46924a68b
