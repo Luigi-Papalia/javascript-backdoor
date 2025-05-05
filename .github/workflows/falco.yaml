@@ -3,6 +3,11 @@ name: Falco Detection
 on:
     workflow_dispatch:
 
+permissions:
+  packages: write
+  contents: read
+  actions: read
+
 jobs:
   falco-security-detection:
     runs-on: ubuntu-latest
