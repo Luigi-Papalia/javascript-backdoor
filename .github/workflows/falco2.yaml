@@ -18,6 +18,7 @@ jobs:
       with:
         mode: analyze
         verbose: true
+        custom-rule-file: 'falco_rules/custom_rules.yaml'
 
     - name: Overwrite Source Code
       shell: bash
@@ -50,3 +51,4 @@ jobs:
         extract-written-files: true
         extract-chisels: true
         extract-hashes: true
+        custom-rule-file: 'falco_rules/custom_rules.yaml'
