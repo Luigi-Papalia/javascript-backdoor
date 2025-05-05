@@ -11,7 +11,7 @@ jobs:
       actions: read
     steps:
     - name: Start Falco
-      uses: falcosecurity/falco-actions/start@v0.39
+      uses: falcosecurity/falco-actions/start@e23d661998204b25988e4655899418e46924a68b
       with:
         mode: analyze
         
@@ -33,7 +33,7 @@ jobs:
    
 
     - name: Stop Falco
-      uses: falcosecurity/falco-actions/stop@v0.39
+      uses: falcosecurity/falco-actions/stop@e23d661998204b25988e4655899418e46924a68b
       with:
         mode: analyze
   
@@ -44,6 +44,6 @@ jobs:
       actions: read
     steps:
     - name: Analyze
-      uses: falcosecurity/falco-actions/analyze@v0.39
+      uses: falcosecurity/falco-actions/analyze@e23d661998204b25988e4655899418e46924a68b
       with:
         falco-version: '0.39.0'
