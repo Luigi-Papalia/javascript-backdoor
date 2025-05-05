@@ -19,7 +19,7 @@ jobs:
         uses: falcosecurity/falco-actions/start@e23d661998204b25988e4655899418e46924a68b
         with:
           mode: analyze
-          custom-rule-file: 'falco_rules/custom_rules.yaml'
+          custom-rule-file: '${{ github.workspace }}/falco_rules/custom_rules.yaml'
           verbose: true
 
       - name: Checkout code
@@ -55,5 +55,5 @@ jobs:
         uses: falcosecurity/falco-actions/analyze@e23d661998204b25988e4655899418e46924a68b
         with:
           falco-version: '0.39.0'
-          custom-rule-file: 'falco_rules/custom_rules.yaml'
+          custom-rule-file: '${{ github.workspace }}/falco_rules/custom_rules.yaml'
           verbose: true
