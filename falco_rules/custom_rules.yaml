@@ -6,7 +6,7 @@
     fd.name startswith "/workspace" and
     fd.type = "file" and
     proc.name in (npm, node, bash, sh, yarn) and
-    not fd.name pmatch ("*/node_modules/*", "*.log", "*.lock", "*.json")
+    not fd.name pmatch ("*/node_modules/*", "*.log")
   output: >
     Suspicious write by '{{proc.name}}' to '{{fd.name}}' during build/install
   priority: WARNING
