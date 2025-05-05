@@ -1,4 +1,4 @@
-name: Falco Detection
+name: Falco Detection 2
 
 on:
   workflow_dispatch:
