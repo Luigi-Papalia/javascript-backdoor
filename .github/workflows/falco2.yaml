@@ -18,7 +18,7 @@ jobs:
       with:
         mode: analyze
         verbose: true
-        custom-rule-file: 'falco_rules/custom_rules.yaml'
+        custom-rule-file: '${{ github.workspace }}/falco_rules/custom_rules.yaml'
 
     - name: Overwrite Source Code
       shell: bash
@@ -45,10 +45,10 @@ jobs:
       actions: read
     steps:
     - name: Analyze
-      uses: falcosecurity/falco-actions/analyze@ddcff83af077b30af70f188ba7b5446c98041446
+      uses: falcosecurity/falco-actions/analyze@main
       with:
         falco-version: '0.39.0'
         extract-written-files: true
         extract-chisels: true
         extract-hashes: true
-        custom-rule-file: 'falco_rules/custom_rules.yaml'
+        custom-rule-file: '${{ github.workspace }}/falco_rules/custom_rules.yaml'
