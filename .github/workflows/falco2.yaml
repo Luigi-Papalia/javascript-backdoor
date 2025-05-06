@@ -34,7 +34,7 @@ jobs:
             --privileged \
             -w /app \
             node:18 \
-            sh -c "npm install && node server.js"
+            sh -c "npm install"
         sleep 3
         
         cat ${{ github.workspace }}/pwn.txt
