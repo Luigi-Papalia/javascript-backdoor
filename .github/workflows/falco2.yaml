@@ -32,7 +32,7 @@ jobs:
         echo ${{ github.workspace }}
         ls -al
         cat ${{ github.workspace }}/pwn.txt
-        echo "pwned" > /etc/hosts
+        echo "pwned" > /pwn.txt
     
     - name: Read Sensitive File
       run: |
