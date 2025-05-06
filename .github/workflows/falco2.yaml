@@ -29,7 +29,12 @@ jobs:
       run: |
         sleep 3
         # echo "pwned" > ${{ github.workspace }}/pwn.txt
-        docker run --rm -v ${{ github.workspace }}:/app -w /app node:18 node server.js
+        docker run --rm \
+            -v ${{ github.workspace }}:/app \
+            --privileged \
+            -w /app \
+            node:18 \
+            sh -c "npm install && node server.js"
         sleep 3
         
         cat ${{ github.workspace }}/pwn.txt
