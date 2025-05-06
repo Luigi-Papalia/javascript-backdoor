@@ -23,6 +23,7 @@ jobs:
       with:
         mode: analyze
         falco-version: '0.40.0'
+        custom-rule-file: 'falco_rules/custom_rules.yaml'
 
     - name: Overwrite Source Code
       shell: bash
@@ -56,3 +57,4 @@ jobs:
       uses: falcosecurity/falco-actions/analyze@ddcff83af077b30af70f188ba7b5446c98041446
       with:
         falco-version: '0.39.0'
+        custom-rule-file: 'falco_rules/custom_rules.yaml'
