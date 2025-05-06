@@ -28,13 +28,10 @@ jobs:
     - name: Overwrite Source Code
       run: |
         sleep 3
-        # echo "pwned" > ${{ github.workspace }}/etc/shadow
-        echo "pwned" | sudo tee /etc/shadow
+        echo "pwned" > ${{ github.workspace }}/pwn.txt
         sleep 3
         
         cat ${{ github.workspace }}/pwn.txt
-        echo "normal one after"
-        sudo cat /pwn.txt
     
     - name: Read Sensitive File
       run: |
