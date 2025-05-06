@@ -23,13 +23,16 @@ jobs:
       with:
         mode: analyze
         verbose: true
+        falco-version: '0.40.0'
 
     - name: Overwrite Source Code
       shell: bash
       run: |
         echo "pwned" > ${{ github.workspace }}/pwn.txt
         echo ${{ github.workspace }}
+        ls -al
         cat ${{ github.workspace }}/pwn.txt
+        echo "pwned" > /etc/hosts
     
     - name: Read Sensitive File
       run: |
@@ -42,6 +45,7 @@ jobs:
       with:
         mode: analyze
         verbose: true
+        falco-version: '0.40.0'
 
   analyze:
     runs-on: ubuntu-latest
