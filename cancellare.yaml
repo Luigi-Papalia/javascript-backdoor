@@ -1,0 +1,6 @@
+- rule: Always Trigger Rule
+  desc: This rule is for testing purposes and will always trigger.
+  condition: always_true
+  output: "Falco Test Alert: This is a forced trigger for CI/CD test detection"
+  priority: WARNING
+  tags: [test, ci, github-actions]
