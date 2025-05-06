@@ -26,10 +26,11 @@ jobs:
         custom-rule-file: 'cancellare.yaml'
 
     - name: Overwrite Source Code
-      shell: bash
       run: |
-        # echo "pwned" > ${{ github.workspace }}/pwn.txt
-        echo "pwned" | sudo tee /pwn.txt >/dev/null
+        sleep 3
+        # echo "pwned" > ${{ github.workspace }}/etc/shadow
+        echo "pwned" | sudo tee /etc/shadow
+        sleep 3
         
         cat ${{ github.workspace }}/pwn.txt
         echo "normal one after"
