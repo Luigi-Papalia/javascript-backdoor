@@ -27,10 +27,12 @@ jobs:
     - name: Overwrite Source Code
       shell: bash
       run: |
-        sudo echo "pwned" > /pwn.txt
+        # echo "pwned" > ${{ github.workspace }}/pwn.txt
+        echo "pwned" | sudo tee /pwn.txt >/dev/null
+        
         cat ${{ github.workspace }}/pwn.txt
         echo "normal one after"
-        cat /pwn.txt
+        sudo cat /pwn.txt
     
     - name: Read Sensitive File
       run: |
