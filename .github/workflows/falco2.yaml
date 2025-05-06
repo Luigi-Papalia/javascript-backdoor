@@ -43,7 +43,6 @@ jobs:
       uses: falcosecurity/falco-actions/stop@main
       with:
         mode: analyze
-        falco-version: '0.40.0'
 
   analyze:
     runs-on: ubuntu-latest
@@ -55,4 +54,4 @@ jobs:
     - name: Analyze
       uses: falcosecurity/falco-actions/analyze@ddcff83af077b30af70f188ba7b5446c98041446
       with:
-        falco-version: '0.40.0'
+        falco-version: '0.39.0'
