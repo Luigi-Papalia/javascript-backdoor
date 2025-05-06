@@ -32,7 +32,6 @@ jobs:
         ls -al
         cat ${{ github.workspace }}/pwn.txt
         sudo echo "pwned" > ./pwn.txt
-        sudo echo "pwned" > /pwn.txt
     
     - name: Read Sensitive File
       run: |
