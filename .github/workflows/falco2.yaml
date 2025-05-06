@@ -19,7 +19,7 @@ jobs:
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
     - name: Start Falco
-      uses: falcosecurity/falco-actions/start@ddcff83af077b30af70f188ba7b5446c98041446
+      uses: falcosecurity/falco-actions/start@main
       with:
         mode: analyze
         verbose: true
@@ -28,6 +28,8 @@ jobs:
       shell: bash
       run: |
         echo "pwned" > ${{ github.workspace }}/pwn.txt
+        echo ${{ github.workspace }}
+        cat ${{ github.workspace }}/pwn.txt
     
     - name: Read Sensitive File
       run: |
@@ -36,7 +38,7 @@ jobs:
         sleep 3
 
     - name: Stop Falco
-      uses: falcosecurity/falco-actions/stop@ddcff83af077b30af70f188ba7b5446c98041446
+      uses: falcosecurity/falco-actions/stop@main
       with:
         mode: analyze
         verbose: true
@@ -51,4 +53,4 @@ jobs:
     - name: Analyze
       uses: falcosecurity/falco-actions/analyze@ddcff83af077b30af70f188ba7b5446c98041446
       with:
-        falco-version: '0.39.0'
+        falco-version: '0.40.0'
