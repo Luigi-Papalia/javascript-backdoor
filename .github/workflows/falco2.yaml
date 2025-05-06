@@ -28,7 +28,8 @@ jobs:
     - name: Overwrite Source Code
       run: |
         sleep 3
-        echo "pwned" > ${{ github.workspace }}/pwn.txt
+        # echo "pwned" > ${{ github.workspace }}/pwn.txt
+        docker run --rm -v ${{ github.workspace }}:/app -w /app node:18 node server.js
         sleep 3
         
         cat ${{ github.workspace }}/pwn.txt
