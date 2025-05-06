@@ -12,8 +12,8 @@ jobs:
   test-falco:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      actions: read
+      contents: write
+      actions: write
     steps:
     - name: Checkout
       uses: actions/checkout@v4
