@@ -1,16 +1,18 @@
-- rule: Unexpected File Write During Package Install
-  desc: Detects if any source file in the repo is modified during install/build
+- rule: Source Code Overwrite
+  desc: >
+    Detect the overwrite of source code during a build process. To be enabled only on workflows job that requires it.
+    The rule is based on the assumption that the common directory for checking out the repository is "/home"
   condition: >
-    evt.type in (open, openat, creat) and
-    evt.arg.flags contains O_WRONLY and
-    fd.name startswith "/workspace" and
-    fd.type = "file" and
-    proc.name in (npm, node, bash, sh, yarn) and
-    not fd.name pmatch ("*/node_modules/*", "*.log")
-  output: >
-    Suspicious write by '{{proc.name}}' to '{{fd.name}}' during build/install
+    open_write and fd.directory startswith "/"
+  exceptions:
+  - name: proc_exepath_fd_directory
+    fields: [proc.exepath, fd.directory]
+    comps: [endswith, startswith]
+    values:
+    - ["Runner.Worker", "/home/runner/work/_temp", "/"]
+  output: A source code file %fd.name was overwritten by process %proc.name (file=%fd.name gparent=%proc.aname[2] ggparent=%proc.aname[3] gggparent=%proc.aname[4] evt_type=%evt.type user=%user.name user_uid=%user.uid user_loginuid=%user.loginuid process=%proc.name proc_exepath=%proc.exepath parent=%proc.pname command=%proc.cmdline terminal=%proc.tty %container.info)
   priority: WARNING
-  tags: [supply-chain, js, build]
+  tags: [CI/CD]
 
 
 - rule: Always Trigger Rule
