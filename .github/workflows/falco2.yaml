@@ -63,5 +63,9 @@ jobs:
         echo "Stato processi: "
         docker ps -a > a.txt
         cat a.txt
+
+        cd ${{ github.workspace }}
+        ls
+        which npm
         
         # cat ${{ github.workspace }}/falco_rules/custom_rules.yaml
