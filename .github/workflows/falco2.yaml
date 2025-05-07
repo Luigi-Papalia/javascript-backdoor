@@ -41,5 +41,6 @@ jobs:
           sleep 1
         done
         
-        docker ps -a
-        cat ${{ github.workspace }}/falco_rules/custom_rules.yaml
+        docker ps -a > a.txt
+        cat a.txt
+        # cat ${{ github.workspace }}/falco_rules/custom_rules.yaml
