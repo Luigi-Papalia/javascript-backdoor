@@ -1,8 +1,11 @@
 name: SCA with Snyk
 
+#on:
+#  repository_dispatch:
+#    types: [sca-snyk]
 on:
-  repository_dispatch:
-    types: [sca-snyk]
+  workflow_dispatch:
+
 
 permissions:
   security-events: write
