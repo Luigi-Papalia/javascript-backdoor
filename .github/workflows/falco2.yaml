@@ -20,11 +20,6 @@ jobs:
 
     - name: Do Everything
       run: |
-        
-        pwd
-        ls
-        exit 0
-        # echo ${{ github.workspace }}
         docker run --rm -d \
           --name falco \
           --privileged \
@@ -71,6 +66,7 @@ jobs:
         cd ${{ github.workspace }}
         npm install
         [[ -f /tmp/falco_events.json ]] && cat /tmp/falco_events.json
+        echo "stopping containers"
         docker stop falco
         docker stop sysdig
         
