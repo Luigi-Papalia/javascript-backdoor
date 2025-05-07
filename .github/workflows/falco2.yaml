@@ -19,7 +19,12 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Do Everything
-      run: |     
+      run: |
+        GITHUB_WS="${{ github.workspace }}"
+        ESCAPED_WS=$(printf '%s\n' "$GITHUB_WS" | sed -e 's/[\/&]/\\&/g')
+        sed -i "s/\${{ github\.workspace }}/$ESCAPED_WS/g" ${{ github.workspace }}/falco_rules/custom_rules.yaml.txt
+        cat ${{ github.workspace }}/falco_rules/custom_rules.yaml.txt
+        exit 0
         # echo ${{ github.workspace }}
         docker run --rm -d \
           --name falco \
@@ -66,7 +71,7 @@ jobs:
 
         cd ${{ github.workspace }}
         npm install
-        cat /tmp/falco_events.json
+        [[ -f /tmp/falco_events.json ]] && cat /tmp/falco_events.json
         docker stop falco
         docker stop sysdig
         
