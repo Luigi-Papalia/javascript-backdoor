@@ -41,6 +41,27 @@ jobs:
           sleep 1
         done
         
-        docker logs falco > a.txt
+        docker run --rm -d --name sysdig --privileged \
+          -v /var/run/docker.sock:/host/var/run/docker.sock \
+          -v /dev:/host/dev -v /proc:/host/proc:ro \
+          -v /boot:/host/boot:ro \
+          -v /lib/modules:/host/lib/modules:ro \
+          -v /home/garou/sandbox/javascript:/javascript:rw \
+          -v /usr:/host/usr:ro \
+          -v /tmp:/tmp \
+          --net=host sysdig/sysdig:latest sysdig --modern-bpf -w /tmp/capture.scap --snaplen=256 "not evt.type in (switch)"
+
+        for i in {1..30}; do
+          if docker ps --filter "name=sysdig" --filter "status=running" | grep -q sysdig; then
+            echo "Sysdig is running!!!!!!!!!"
+            break
+          fi
+          echo "Waiting...."
+          sleep 1
+        done
+
+        echo "Stato processi: "
+        docker ps -a > a.txt
         cat a.txt
+        
         # cat ${{ github.workspace }}/falco_rules/custom_rules.yaml
