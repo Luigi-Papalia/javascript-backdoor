@@ -59,15 +59,9 @@ jobs:
           sleep 1
         done
 
-        echo "Stato processi: "
-        docker ps -a > a.txt
-        cat a.txt
 
-        cd ${{ github.workspace }}
         npm install
         [[ -f /tmp/falco_events.json ]] && cat /tmp/falco_events.json
         echo "stopping containers"
         docker stop falco
         docker stop sysdig
-        
-        # cat ${{ github.workspace }}/falco_rules/custom_rules.yaml
