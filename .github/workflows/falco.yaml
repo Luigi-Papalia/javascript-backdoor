@@ -62,14 +62,33 @@ jobs:
           sleep 1
         done
 
-    - name: Publish the image
-      run: |  
-        npm install
-        [[ -f /tmp/falco_events.json ]] && cat /tmp/falco_events.json
-        echo "stopping containers"
+    #- name: Publish the image
+    #  run: |  
+    #    npm install
+    #    [[ -f /tmp/falco_events.json ]] && cat /tmp/falco_events.json
+    #    echo "stopping containers"
+    #    docker stop falco
+    #    docker stop sysdig
+
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.DOCKER_REGISTRY_TOKEN }}
+
+    - name: Build and Push Docker image
+      run: |
+        OWNER=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')
+        docker build -t ghcr.io/${OWNER}/vulnerable-app:latest .
+        docker push ghcr.io/${OWNER}/vulnerable-app:latest
+
+    - name: Stop Containers
+      run: |
+        echo "Stopping Falco and Sysdig"
         docker stop falco
         docker stop sysdig
-
+    
     - name: Create SARIF
       run: |
         python ${{ github.workspace }}/utility/generate_sarif.py /tmp/falco_events.json falco.sarif
