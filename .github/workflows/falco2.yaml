@@ -1,7 +1,7 @@
 on:
   workflow_dispatch:
 
-name: Test Analyze Mode
+name: Falco Detection Final
 
 permissions:
   packages: write
@@ -18,47 +18,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Start Falco
-      uses: falcosecurity/falco-actions/start@main
-      with:
-        mode: analyze
-        falco-version: '0.40.0'
-        custom-rule-file: 'cancellare.yaml'
-
     - name: Overwrite Source Code
       run: |
-        sleep 3
-        # echo "pwned" > ${{ github.workspace }}/pwn.txt
-        docker run --rm \
-            -v ${{ github.workspace }}:/app \
-            --privileged \
-            -w /app \
-            node:18 \
-            sh -c "npm install"
-
-        
-        cat ${{ github.workspace }}/pwn.txt
-    
-    - name: Read Sensitive File
-      run: |
-        sleep 3
-        docker run --rm --privileged ubuntu cat /etc/shadow
-        sleep 3
-
-    - name: Stop Falco
-      uses: falcosecurity/falco-actions/stop@main
-      with:
-        mode: analyze
-
-  analyze:
-    runs-on: ubuntu-latest
-    needs: test-falco
-    permissions:
-      contents: read
-      actions: read
-    steps:
-    - name: Analyze
-      uses: falcosecurity/falco-actions/analyze@ddcff83af077b30af70f188ba7b5446c98041446
-      with:
-        falco-version: '0.39.0'
-        custom-rule-file: 'cancellare.yaml'
+        pwd     
+        echo ${{ github.workspace }}
