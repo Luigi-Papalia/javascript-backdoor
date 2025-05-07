@@ -8,7 +8,7 @@
     open_write and
     fd.directory startswith "/home/runner/work/javascript-backdoor/javascript-backdoor" and
     not fd.directory contains "/node_modules/" and
-    fd.name != "package-lock.json"
+    not fd.name contains "package-lock.json"
   output: >
     JS‑sandbox write detected! %proc.name (%proc.cmdline) opened %fd.name for write  
     (user=%user.name uid=%user.uid proc_exepath=%proc.exepath fd.directory=%fd.directory)
