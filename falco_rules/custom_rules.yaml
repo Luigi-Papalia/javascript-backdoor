@@ -2,13 +2,11 @@
 
 - rule: JS Sandbox Container Write
   desc: >
-    Detect any write‑open to files inside 
-    `/home/runner/work/javascript-backdoor/javascript-backdoor` 
-    *within* a container, excluding `node_modules` and `package-lock.json`.
+    Detect any write‑open to files inside "/home/runner/work/javascript-backdoor/javascript-backdoor" within a container, excluding "node_modules" and "package-lock.json".
   condition: >
-    open_write and                                                # file opened for write :contentReference[oaicite:0]{index=0}
-    container.id != host and                                      # only inside containers :contentReference[oaicite:1]{index=1}
-    fs.path.name startswith "/home/runner/work/javascript-backdoor/javascript-backdoor" and  # normalized path :contentReference[oaicite:2]{index=2}
+    open_write and
+    container.id != host and
+    fs.path.name startswith "/home/runner/work/javascript-backdoor/javascript-backdoor" and
     not fs.path.name contains "/node_modules" and
     not fs.path.name contains "package-lock.json"
   output: >
