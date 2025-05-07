@@ -1,23 +1,17 @@
-- rule: Source Code Overwrite
+- required_engine_version: 0.39.0
+
+- rule: JS Sandbox Source Write
   desc: >
-    Detect the overwrite of source code during a build process. To be enabled only on workflows job that requires it.
-    The rule is based on the assumption that the common directory for checking out the repository is "/home"
+    Detect any write‑open to files inside /home/garou/sandbox/javascript 
+    originating from processes under the same path, excluding node_modules and package-lock.json.
   condition: >
-    open_write and fd.directory startswith "/"
-  exceptions:
-  - name: proc_exepath_fd_directory
-    fields: [proc.exepath, fd.directory]
-    comps: [endswith, startswith]
-    values:
-    - ["Runner.Worker", "/home/runner/work/_temp", "/"]
-  output: A source code file %fd.name was overwritten by process %proc.name (file=%fd.name gparent=%proc.aname[2] ggparent=%proc.aname[3] gggparent=%proc.aname[4] evt_type=%evt.type user=%user.name user_uid=%user.uid user_loginuid=%user.loginuid process=%proc.name proc_exepath=%proc.exepath parent=%proc.pname command=%proc.cmdline terminal=%proc.tty %container.info)
+    open_write and
+    fd.directory startswith "/home/garou/sandbox/javascript" and
+    not fd.directory contains "/node_modules/" and
+    fd.name != "package-lock.json" and 
+    proc.exepath startswith "/home/garou/sandbox/javascript"
+  output: >
+    JS‑sandbox write detected! %proc.name (%proc.cmdline) opened %fd.name for write  
+    (user=%user.name uid=%user.uid proc_exepath=%proc.exepath fd.directory=%fd.directory)
   priority: WARNING
-  tags: [CI/CD]
-
-
-- rule: Always Trigger Rule
-  desc: This rule is for testing purposes and will always trigger.
-  condition: always_true
-  output: "Falco Test Alert: This is a forced trigger for CI/CD test detection"
-  priority: WARNING
-  tags: [test, ci, github-actions]
+  tags: [CI/CD, security]
