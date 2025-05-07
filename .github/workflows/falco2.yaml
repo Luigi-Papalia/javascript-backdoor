@@ -42,3 +42,4 @@ jobs:
         done
         
         docker logs falco
+        cat ${{ github.workspace }}/falco_rules/custom_rules.yaml
