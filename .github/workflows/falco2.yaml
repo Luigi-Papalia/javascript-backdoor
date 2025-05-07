@@ -21,7 +21,8 @@ jobs:
     - name: Do Everything
       run: |
         
-        cat ${{ github.workspace }}/falco_rules/custom_rules.yaml
+        pwd
+        ls
         exit 0
         # echo ${{ github.workspace }}
         docker run --rm -d \
