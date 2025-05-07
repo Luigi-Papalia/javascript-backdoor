@@ -62,9 +62,9 @@ jobs:
           sleep 1
         done
 
-    - name: Publish the image
-      run: |
-         [[ -f /tmp/falco_events.json ]] && cat /tmp/falco_events.json 
+    #- name: Publish the image
+    #  run: |
+    #     [[ -f /tmp/falco_events.json ]] && cat /tmp/falco_events.json 
     #    npm install
     #    echo "stopping containers"
     #    docker stop falco
