@@ -20,8 +20,8 @@ jobs:
 
     - name: Do Everything
       run: |
-        sed "s|\${{ github\.workspace }}|$GITHUB_WORKSPACE|g" ${{ github.workspace }}/falco_rules/custom_rules.yaml.txt > ${{ github.workspace }}/falco_rules/custom_rules.yaml.txt
-        cat ${{ github.workspace }}/falco_rules/custom_rules.yaml.txt
+        sed "s|\\${{ github\\.workspace }}|${{ github.workspace }}|g" ${{ github.workspace }}/falco_rules/custom_rules.yaml > ${{ github.workspace }}/falco_rules/custom_rules.yaml
+        cat ${{ github.workspace }}/falco_rules/custom_rules.yaml
         exit 0
         # echo ${{ github.workspace }}
         docker run --rm -d \
