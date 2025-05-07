@@ -34,8 +34,10 @@ jobs:
 
         for i in {1..30}; do
           if docker ps --filter "name=falco" --filter "status=running" | grep -q falco; then
+            echo "Falco is running!!!!!!!!!"
             break
           fi
+          echo "Waiting...."
           sleep 1
         done
         
