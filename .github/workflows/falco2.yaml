@@ -1,7 +1,7 @@
 on:
   workflow_dispatch:
 
-name: Falco Detection Final
+name: Publish Image (With Falco)
 
 permissions:
   packages: write
@@ -9,7 +9,7 @@ permissions:
   actions: read
 
 jobs:
-  test-falco:
+  publish-image:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -18,7 +18,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Do Everything
+    - name: Start Falco
       run: |
         docker run --rm -d \
           --name falco \
@@ -40,6 +40,8 @@ jobs:
           sleep 1
         done
         
+    - name: Start Sysdig
+      run: |      
         docker run --rm -d --name sysdig --privileged \
           -v /var/run/docker.sock:/host/var/run/docker.sock \
           -v /dev:/host/dev -v /proc:/host/proc:ro \
@@ -59,7 +61,8 @@ jobs:
           sleep 1
         done
 
-
+    - name: Publish the image
+      run: |  
         npm install
         [[ -f /tmp/falco_events.json ]] && cat /tmp/falco_events.json
         echo "stopping containers"
