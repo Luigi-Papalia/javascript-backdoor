@@ -20,9 +20,7 @@ jobs:
 
     - name: Do Everything
       run: |
-        GITHUB_WS="${{ github.workspace }}"
-        ESCAPED_WS=$(printf '%s\n' "$GITHUB_WS" | sed -e 's/[\/&]/\\&/g')
-        sed -i "s/\${{ github\.workspace }}/$ESCAPED_WS/g" ${{ github.workspace }}/falco_rules/custom_rules.yaml.txt
+        sed "s|\${{ github\.workspace }}|$GITHUB_WORKSPACE|g" ${{ github.workspace }}/falco_rules/custom_rules.yaml.txt > ${{ github.workspace }}/falco_rules/custom_rules.yaml.txt
         cat ${{ github.workspace }}/falco_rules/custom_rules.yaml.txt
         exit 0
         # echo ${{ github.workspace }}
