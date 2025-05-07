@@ -1,7 +1,5 @@
 - required_engine_version: 0.39.0
 
-- required_engine_version: 0.39.0
-
 - rule: JS Sandbox Container Write
   desc: >
     Detect any write‑open to files inside 
