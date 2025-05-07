@@ -21,7 +21,7 @@ jobs:
     - name: Do Everything
       run: |     
         # echo ${{ github.workspace }}
-        docker run --rm -d \
+        docker run -d \
           --name falco \
           --privileged \
           -v /tmp:/tmp \
