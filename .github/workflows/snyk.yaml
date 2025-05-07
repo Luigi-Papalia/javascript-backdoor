@@ -29,6 +29,9 @@ jobs:
           args: --sarif-file-output=snyk.sarif
         continue-on-error: true
 
+      - name: Print Sariff
+        run: cat snyk.sarif 
+
       - name: Upload SARIF to GitHub
         uses: github/codeql-action/upload-sarif@v3
         with:
