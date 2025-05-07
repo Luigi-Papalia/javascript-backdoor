@@ -32,4 +32,11 @@ jobs:
           -v ${{ github.workspace }}/falco_rules/custom_rules.yaml:/etc/falco/rules.d/custom_rules.yaml \
           falcosecurity/falco:latest falco -o "json_output=true" -o "file_output.enabled=true" -o "file_output.keep_alive=false" -o "file_output.filename=/tmp/falco_events.json" -o "engine.kind=modern_ebpf" -o base_syscalls.all=true
 
+        for i in {1..30}; do
+          if docker ps --filter "name=falco" --filter "status=running" | grep -q falco; then
+            break
+          fi
+          sleep 1
+        done
+        
         docker logs falco
