@@ -20,7 +20,6 @@ jobs:
       - name: Run YARA scan (exclude .git folder)
       id: scan
       run: |
-        touch results.txt
         yara -r yara_rules/base64_obfuscation.yar > results.txt || true
         echo "Filtered YARA scan results (excluding .git):"
-        grep -v 'git' results.txt || echo "No matches found."
+        grep -v "git" results.txt || echo "No matches found."
