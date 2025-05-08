@@ -1,7 +1,7 @@
 name: YARA Obfuscation Scan
 
 on:
-  workflow-dispatch:
+  workflow_dispatch:
 
 jobs:
   yara-scan:
