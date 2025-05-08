@@ -93,12 +93,12 @@ jobs:
       run: |
         if [[ -f /tmp/falco_events.json ]]; then
           python ${{ github.workspace }}/utility/generate_sarif.py /tmp/falco_events.json falco.sarif
-          cat /tmp/falco_events.json
+          # cat /tmp/falco_events.json
         else
           echo "No findings from Falco."
         fi
     
-    #- name: Upload SARIF to GitHub
-    #  uses: github/codeql-action/upload-sarif@v3
-    #  with:
-    #    sarif_file: falco.sarif
+    - name: Upload SARIF to GitHub
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: falco.sarif
