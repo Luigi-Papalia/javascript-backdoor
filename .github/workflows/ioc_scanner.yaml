@@ -10,12 +10,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run IoC Scanner via Docker
+      - name: Install ioc-scan
+        run: pip install ioc-scan
+
+      - name: Run IoC Scanner
         run: |
-          docker run --rm \
-            -v ${{ github.workspace }}/iocs_files:/repo \
-            cisagov/ioc-scanner:3.0.0 \
-            --file /repo/iocs_files/hashes.txt \
-            --file /repo/iocs_files/domains.txt \
-            --file /repo/iocs_files/ips.txt \
-            --target /repo
+          # run against your repo root, pointing to your IoC lists
+          ioc-scan \
+            --file ./iocs/hashes.txt \
+            --file ./iocs/domains.txt \
+            --file ./iocs/ips.txt \
+            --target .
