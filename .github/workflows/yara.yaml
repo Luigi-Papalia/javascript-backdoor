@@ -23,7 +23,7 @@ jobs:
           yara -r ${{ github.workspace }}/yara_rules/base64_obfuscation.yar .
 
       - name: Run YARA scan (excluding .git)
-        id: scan
+        id: scan2
         run: |
           find . -type f ! -path "./.git/*" -print0 | xargs -0 yara -r ${{ github.workspace }}/yara_rules/base64_obfuscation.yar
 
