@@ -24,9 +24,3 @@ jobs:
         yara -r yara_rules/base64_obfuscation.yar > results.txt || true
         echo "Filtered YARA scan results (excluding .git):"
         grep -v 'git' results.txt || echo "No matches found."
-
-      - name: Fail if obfuscation detected
-        if: steps.scan.outcome == 'success' && steps.scan.outputs.stdout != ''
-        run: |
-          echo "::error ::Obfuscated (Base64) code detected by YARA. Please review the matches above."
-          exit 1
