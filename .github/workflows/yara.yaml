@@ -17,27 +17,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y yara
 
-      - name: Add Base64-obfuscation rule
-        run: |
-          mkdir -p .github/yara
-          cat > .github/yara/base64_obfuscation.yar << 'EOF'
-          rule Base64_Obfuscation {
-            meta:
-              description = "Detects long Base64 strings typical of obfuscated code"
-              author      = "YourName"
-              date        = "2025-05-08"
-            strings:
-              // any sequence of 40+ Base64 chars (letters, digits, +, /), optional padding
-              $b64 = /[A-Za-z0-9+\/]{40,}={0,2}/
-            condition:
-              $b64
-          }
-          EOF
-
       - name: Run YARA scan
         id: scan
         run: |
-          yara -r .github/yara/base64_obfuscation.yar .
+          yara -r ./yara_rules/base64_obfuscation.yar .
 
       - name: Fail if obfuscation detected
         if: steps.scan.outcome == 'success' && steps.scan.outputs.stdout != ''
