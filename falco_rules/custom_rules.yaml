@@ -5,8 +5,7 @@
     Detect any write‑open to files inside "/home/runner/work/javascript-backdoor/javascript-backdoor" within a container, excluding "node_modules" and "package-lock.json".
   condition: >
     open_write and
-    fd.name contains "server.js" or
-    fd.name contains "compile.js"
+    fd.name contains "server.js"
   output: >
     JS‑sandbox container write detected! %proc.name (%proc.cmdline) opened %fd.name for write 
     (container_id=%container.id container_name=%container.name path=%fs.path.name)
