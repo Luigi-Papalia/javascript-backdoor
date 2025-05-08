@@ -93,6 +93,7 @@ jobs:
       run: |
         if [[ -f /tmp/falco_events.json ]]; then
           python ${{ github.workspace }}/utility/generate_sarif.py /tmp/falco_events.json falco.sarif
+          cat falco.sarif
         else
           echo "No findings from Falco."
         fi
