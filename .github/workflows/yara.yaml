@@ -20,17 +20,7 @@ jobs:
       - name: Run YARA scan
         id: scan
         run: |
-          yara -r ${{ github.workspace }}/yara_rules/base64_obfuscation.yar .
-
-      - name: Run YARA scan (excluding .git)
-        id: scan2
-        run: |
-          find . \
-          -type f \
-          ! -path "./.git/*" \
-          ! -path "./node_modules/*" \
-          -name "*.js" \
-          -print0 | xargs -0 yara -r yara_rules/base64_obfuscation.yar
+          yara -r ${{ github.workspace }}/yara_rules/base64_obfuscation.yar . | grep -v "*.git*
 
       - name: Fail if obfuscation detected
         if: steps.scan.outcome == 'success' && steps.scan.outputs.stdout != ''
