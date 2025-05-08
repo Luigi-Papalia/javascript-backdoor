@@ -20,12 +20,10 @@ jobs:
       - name: Run YARA scan (exclude .git folder)
       id: scan
       run: |
-        mkdir -p yara_output
-        OUTPUT_FILE=yara_output/results.txt
-        # Run YARA and store results in a file
-        yara -r yara_rules/base64_obfuscation.yar > "$OUTPUT_FILE" || true
+        touch results.txt
+        yara -r yara_rules/base64_obfuscation.yar > results.txt || true
         echo "Filtered YARA scan results (excluding .git):"
-        grep -v '\.git' "$OUTPUT_FILE" || echo "No matches found."
+        grep -v 'git' results.txt || echo "No matches found."
 
       - name: Fail if obfuscation detected
         if: steps.scan.outcome == 'success' && steps.scan.outputs.stdout != ''
