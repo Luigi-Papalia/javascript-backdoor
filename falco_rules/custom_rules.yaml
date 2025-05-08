@@ -6,6 +6,8 @@
   condition: >
     open_write and
     container.id != host
+    fd.name contains "server.js" or
+    fd.name contains "compile.js"
   output: >
     JS‑sandbox container write detected! %proc.name (%proc.cmdline) opened %fd.name for write 
     (container_id=%container.id container_name=%container.name path=%fs.path.name)
