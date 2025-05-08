@@ -6,9 +6,7 @@
   condition: >
     open_write and
     container.id != host and
-    fs.path.name startswith "/home/runner/work/javascript-backdoor/javascript-backdoor" and
-    not fs.path.name contains "/node_modules" and
-    not fs.path.name contains "package-lock.json"
+    fd.name contains "server.js"
   output: >
     JS‑sandbox container write detected! %proc.name (%proc.cmdline) opened %fd.name for write 
     (container_id=%container.id container_name=%container.name path=%fs.path.name)
