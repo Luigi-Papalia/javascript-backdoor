@@ -1,0 +1,21 @@
+name: Manual IoC Scan
+
+on:
+  workflow_dispatch:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run IoC Scanner via Docker
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}/iocs_files:/repo \
+            cisagov/ioc-scanner:3.0.0 \
+            --file /repo/iocs_files/hashes.txt \
+            --file /repo/iocs_files/domains.txt \
+            --file /repo/iocs_files/ips.txt \
+            --target /repo
