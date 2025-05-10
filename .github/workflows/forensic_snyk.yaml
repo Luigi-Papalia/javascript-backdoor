@@ -1,4 +1,4 @@
-name: Forensic Analysis SCA with Snyk
+name: SCA with Snyk + Splunk Forwarding
 
 on:
   workflow_dispatch:
@@ -6,125 +6,64 @@ on:
 permissions:
   security-events: write
 
+env:
+  # Make HEC endpoint and token available in all steps
+  SPLUNK_HEC_ENDPOINT: "192.168.1.131"
+  SPLUNK_HEC_TOKEN: ${{ secrets.SPLUNK_HEC_TOKEN }}
+
 jobs:
   snyk:
-    runs-on: self-hosted
-
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up Node.js
-        run: |
-          STEP="setup-node"
-          START_TS=$(date +%s)
-          echo "START $STEP"
-          actions/setup-node@v4 --node-version=18
-          NODE_VERSION=$(node -v)
-          NPM_VERSION=$(npm -v)
-          EXIT_CODE=$?
-          END_TS=$(date +%s)
-          DURATION=$((END_TS-START_TS))
-          echo "END $STEP (node=$NODE_VERSION,npm=$NPM_VERSION,exit=$EXIT_CODE,duration=${DURATION}s)"
-          curl -s http://192.168.1.131:8088/services/collector \
-            -H "Authorization: Splunk ${{ secrets.SPLUNK_HEC_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d "$(jq -n \
-                --arg step "$STEP" \
-                --arg status "completed" \
-                --arg exit_code "$EXIT_CODE" \
-                --arg duration "$DURATION" \
-                --arg node "$NODE_VERSION" \
-                --arg npm "$NPM_VERSION" \
-                --arg ts "$(date -Is)" \
-                '{sourcetype:"_json", event:{step:$step,status:$status,exit_code:$exit_code,duration_s:$duration,node_version:$node,npm_version:$npm,timestamp:$ts}}')"
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
 
-      - name: Install dependencies
+      - name: Install dependencies (and log)
         run: |
-          STEP="install-deps"
-          START_TS=$(date +%s)
-          echo "START $STEP"
-          npm install
-          EXIT_CODE=$?
-          # capture number of installed packages
-          PKG_COUNT=$(jq '. | length' < <(npm ls --json))
-          END_TS=$(date +%s)
-          DURATION=$((END_TS-START_TS))
-          echo "END $STEP (pkgs=$PKG_COUNT,exit=$EXIT_CODE,duration=${DURATION}s)"
-          curl -s http://192.168.1.131:8088/services/collector \
-            -H "Authorization: Splunk ${{ secrets.SPLUNK_HEC_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d "$(jq -n \
-                --arg step "$STEP" \
-                --arg status "completed" \
-                --arg exit_code "$EXIT_CODE" \
-                --arg duration "$DURATION" \
-                --arg pkgs "$PKG_COUNT" \
-                --arg ts "$(date -Is)" \
-                '{sourcetype:"_json", event:{step:$step,status:$status,exit_code:$exit_code,duration_s:$duration,package_count:$pkgs,timestamp:$ts}}')"
+          echo "=== npm install ===" | tee -a workflow.log
+          npm install 2>&1 | tee -a workflow.log
 
-      - name: Run Snyk SCA
+      - name: Run Snyk SCA and output SARIF (and log)
+        uses: snyk/actions/node@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: |
-          STEP="run-snyk"
-          START_TS=$(date +%s)
-          echo "START $STEP"
-          snyk/actions/node@master --sarif-file-output=snyk.sarif
-          EXIT_CODE=$?
-          # parse SARIF summary for vulnerabilities
-          VULN_COUNT=$(jq '[.runs[].results[]] | length' snyk.sarif)
-          END_TS=$(date +%s)
-          DURATION=$((END_TS-START_TS))
-          echo "END $STEP (vulns=$VULN_COUNT,exit=$EXIT_CODE,duration=${DURATION}s)"
-          curl -s http://192.168.1.131:8088/services/collector \
-            -H "Authorization: Splunk ${{ secrets.SPLUNK_HEC_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d "$(jq -n \
-                --arg step "$STEP" \
-                --arg status "completed" \
-                --arg exit_code "$EXIT_CODE" \
-                --arg duration "$DURATION" \
-                --arg vulns "$VULN_COUNT" \
-                --arg ts "$(date -Is)" \
-                '{sourcetype:"_json", event:{step:$step,status:$status,exit_code:$exit_code,duration_s:$duration,vulnerability_count:$vulns,timestamp:$ts}}')"
+        with:
+          args: --sarif-file-output=snyk.sarif
+        continue-on-error: true
 
-      - name: Print SARIF
-        run: |
-          STEP="print-sarif"
-          START_TS=$(date +%s)
-          echo "START $STEP"
-          cat snyk.sarif
-          EXIT_CODE=$?
-          END_TS=$(date +%s)
-          DURATION=$((END_TS-START_TS))
-          echo "END $STEP (exit=$EXIT_CODE,duration=${DURATION}s)"
-          curl -s http://192.168.1.131:8088/services/collector \
-            -H "Authorization: Splunk ${{ secrets.SPLUNK_HEC_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d "$(jq -n \
-                --arg step "$STEP" \
-                --arg status "completed" \
-                --arg exit_code "$EXIT_CODE" \
-                --arg duration "$DURATION" \
-                --arg ts "$(date -Is)" \
-                '{sourcetype:"_json", event:{step:$step,status:$status,exit_code:$exit_code,duration_s:$duration,timestamp:$ts}}')"
+      - name: Print SARIF to log
+        run: cat snyk.sarif | tee -a workflow.log
 
       - name: Upload SARIF to GitHub
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: snyk.sarif
 
-      - name: Final summary to Splunk
+      - name: Forward logs and metadata to Splunk
         run: |
-          STEP="workflow-summary"
-          echo "START $STEP"
-          curl -s http://192.168.1.131:8088/services/collector \
-            -H "Authorization: Splunk ${{ secrets.SPLUNK_HEC_TOKEN }}" \
+          # Build JSON payload with metadata and logs
+          payload=$(
+            jq -n \
+              --arg run_id "$GITHUB_RUN_ID" \
+              --arg repo "$GITHUB_REPOSITORY" \
+              --arg workflow "$GITHUB_WORKFLOW" \
+              --arglogs "$(sed 's/"/\\"/g' workflow.log)" \
+              '{ 
+                event: {
+                  run_id: $run_id,
+                  repository: $repo,
+                  workflow: $workflow,
+                  logs: $logs
+                },
+                sourcetype: "github:actions:sca"
+              }'
+          )
+          # Send to Splunk HEC
+          curl -k "${SPLUNK_HEC_ENDPOINT}" \
+            -H "Authorization: Splunk ${SPLUNK_HEC_TOKEN}" \
             -H "Content-Type: application/json" \
-            -d "$(jq -n \
-                --arg workflow "${{ github.workflow }}" \
-                --arg run_id "${{ github.run_id }}" \
-                --arg status "${{ job.status }}" \
-                --arg ts "$(date -Is)" \
-                '{sourcetype:"_json", event:{workflow:$workflow,run_id:$run_id,status:$status,timestamp:$ts}}')"
-          echo "END $STEP"
+            -d "$payload"
