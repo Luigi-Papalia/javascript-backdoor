@@ -1,23 +1,42 @@
-name: Manual IoC Scan
+name: IOC Finder Scan
 
 on:
   workflow_dispatch:
 
 jobs:
   scan:
-    runs-on: ubuntu-latest
+    name: Run IOC Matcher
+    runs-on: [self-hosted, linux]
+
+    env:
+      MISP_URL: ${{ secrets.MISP_URL }}
+      MISP_API_KEY: ${{ secrets.MISP_API_KEY }}
+      VERIFY_CERT: "false"
+      INPUT_FOLDER: "./javascript-backdoor-main"
+
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install ioc-scan
-        run: pip install ioc-scan
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
-      - name: Run IoC Scanner
+      - name: Install dependencies
         run: |
-          # run against your repo root, pointing to your IoC lists
-          ioc-scan \
-            --file ./iocs/hashes.txt \
-            --file ./iocs/domains.txt \
-            --file ./iocs/ips.txt \
-            --target .
+          python -m pip install --upgrade pip
+          pip install ioc-finder pymisp
+
+      - name: Run IOC Matcher
+        run: |
+          mkdir -p output
+          # capture stdout+stderr to a log file
+          python ioc_matcher.py 2>&1 | tee output/ioc-scan.log
+        continue-on-error: true
+
+      - name: Upload scan log
+        uses: actions/upload-artifact@v4
+        with:
+          name: ioc-scan-log
+          path: output/ioc-scan.log
