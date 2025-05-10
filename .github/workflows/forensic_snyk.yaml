@@ -7,13 +7,12 @@ permissions:
   security-events: write
 
 env:
-  # Make HEC endpoint and token available in all steps
   SPLUNK_HEC_ENDPOINT: "https://192.168.1.131:8088/services/collector"
   SPLUNK_HEC_TOKEN: ${{ secrets.SPLUNK_HEC_TOKEN }}
 
 jobs:
   snyk:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
 
