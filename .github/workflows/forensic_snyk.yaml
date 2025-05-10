@@ -132,7 +132,7 @@ jobs:
                 '{sourcetype:"_json", event:{step:$step,status:$status,exit_code:$exit_code,duration_s:$duration,timestamp:$ts}}')"
 
       - name: Upload SARIF to GitHub
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: snyk.sarif
 
