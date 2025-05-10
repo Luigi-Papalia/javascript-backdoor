@@ -36,7 +36,7 @@ def initialize(args):
     session.mount('http://', adapter)
     return misp
 
-# ── 2) Collect & dedupe all IOCs, mapping to source files ───────────────────────
+# ── Collect & dedupe all IOCs, mapping to source files ────────────────────────
 def collect_iocs(input_folder, extensions):
     ioc_sources = defaultdict(set)
     for root, _, files in os.walk(input_folder):
@@ -48,75 +48,78 @@ def collect_iocs(input_folder, extensions):
                     with open(path, encoding='utf-8') as f:
                         content = f.read()
                 except Exception as e:
-                    print(f"[WARN] Cannot read {path}: {e}")
+                    print(f"**Warning:** Cannot read `{path}`: {e}")
                     continue
 
-                extracted = find_iocs(content)
-                for lst in extracted.values():
+                for lst in find_iocs(content).values():
                     for ioc in lst:
                         ioc_sources[ioc].add(path)
     return ioc_sources
 
-# ── 3) Cache-backed MISP search ─────────────────────────────────────────────────
+# ── Cache-backed MISP search ─────────────────────────────────────────────────
 cache = {}
 def cached_search(misp, ioc):
     if ioc in cache:
         return cache[ioc]
-    res = misp.search(
-        controller='attributes',
-        value=ioc,
-        return_format='json',
-        pythonify=False
-    )
+    res = misp.search(controller='attributes', value=ioc, return_format='json', pythonify=False)
     attrs = res.get('Attribute', [])
     cache[ioc] = attrs
     return attrs
 
-# ── 4) Display details with file context ───────────────────────────────────────
-def display_match_details(misp, attr, filepath):
+# ── Display details in Markdown format ────────────────────────────────────────
+def display_match_details_md(misp, attr, filepath):
     try:
         event = misp.get_event(attr['event_id'], pythonify=True)
-        print(f"\n[ALERT] Match found (file: {filepath}):")
-        print(f"  - IOC Value           : {attr.get('value')}")
-        print(f"  - IOC Type            : {attr.get('type')}")
-        print(f"  - Category            : {attr.get('category')}")
-        print(f"  - To IDS              : {attr.get('to_ids')}")
-        print(f"  - Comment             : {attr.get('comment')}")
-        tags = [t['name'] for t in attr.get('Tag', [])]
-        print(f"  - Attribute Tags      : {tags}")
-
-        print(f"  - Event ID            : {event.id}")
-        print(f"  - Event Info          : {event.info}")
-        print(f"  - Event Date          : {event.date}")
-        etags = [t.name for t in event.tags]
-        print(f"  - Event Tags          : {etags}")
-        print(f"  - Event Threat Level  : {event.threat_level_id}")
-        print(f"  - Event Analysis      : {event.analysis}")
-        print(f"  - Event Distribution  : {event.distribution}")
-        print(f"  - Event Org           : {event.orgc.name}")
+        # Markdown header for each alert
+        print(f"## :warning: Alert: Match found (file: `{filepath}`)")
+        print()
+        # IOC details
+        print(f"- **IOC Value:** `{attr.get('value')}`")
+        print(f"- **IOC Type:** {attr.get('type')}  ")
+        print(f"- **Category:** {attr.get('category')}  ")
+        print(f"- **To IDS:** {attr.get('to_ids')}  ")
+        comment = attr.get('comment') or ''
+        print(f"- **Comment:** {comment}  ")
+        tags = ', '.join(f'`{t['name']}`' for t in attr.get('Tag', []))
+        print(f"- **Attribute Tags:** {tags if tags else 'None'}")
+        print()
+        # Event details
+        print(f"### Event Details")
+        print(f"- **Event ID:** {event.id}")
+        print(f"- **Info:** {event.info}")
+        print(f"- **Date:** {event.date}")
+        etags = ', '.join(f'`{t.name}`' for t in event.tags)
+        print(f"- **Event Tags:** {etags if etags else 'None'}")
+        print(f"- **Threat Level:** {event.threat_level_id}")
+        print(f"- **Analysis:** {event.analysis}")
+        print(f"- **Distribution:** {event.distribution}")
+        print(f"- **Organization:** {event.orgc.name}")
+        print()
     except Exception as e:
-        print(f"[ERROR] Failed to retrieve details for event {attr.get('event_id')}: {e}")
+        print(f"**Error:** Failed to retrieve details for event `{attr.get('event_id')}`: {e}")
 
-# ── 5) Main workflow ────────────────────────────────────────────────────────────
+# ── Main workflow ─────────────────────────────────────────────────────────────
 def main():
     args = parse_args()
 
-    # Validate input folder
     if not os.path.isdir(args.input_folder):
-        print(f"[ERROR] The directory {args.input_folder} does not exist.")
+        print(f"**Error:** The directory `{args.input_folder}` does not exist.")
         sys.exit(1)
 
-    print(f"[INFO] Scanning '{args.input_folder}' with {args.max_workers} threads...")
+    print(f"# IOC Matcher Report")
+    print(f"Scanned directory: `{args.input_folder}` with `{args.max_workers}` threads  ")
+    print()
 
-    # Initialize MISP client
-    misp = initialize(args)
+    # Initialize MISP
+    misp = initialize_misp(args.misp_url, args.misp_key, args.verify_cert)
 
     # Collect IOCs
     extensions = {'txt', 'js', 'yaml', 'json', 'html', 'Dockerfile'}
     ioc_sources = collect_iocs(args.input_folder, extensions)
-    print(f"[INFO] Collected {len(ioc_sources)} unique IOCs.")
+    print(f"- **Total unique IOCs:** {len(ioc_sources)}  ")
+    print()
 
-    # Process IOCs in parallel
+    # Process IOCs
     seen = set()
     def worker(ioc):
         matches = cached_search(misp, ioc)
@@ -126,7 +129,7 @@ def main():
                 continue
             seen.add(key)
             for filepath in ioc_sources[ioc]:
-                display_match_details(misp, attr, filepath)
+                display_match_details_md(misp, attr, filepath)
 
     with ThreadPoolExecutor(max_workers=args.max_workers) as exe:
         exe.map(worker, list(ioc_sources.keys()))
