@@ -70,7 +70,6 @@ def cached_search(misp, ioc):
 def display_match_details_md(misp, attr, filepath):
     try:
         event = misp.get_event(attr['event_id'], pythonify=True)
-        # Markdown header for each alert
         print(f"## :warning: Alert: Match found (file: `{filepath}`)")
         print()
         # IOC details
@@ -80,7 +79,7 @@ def display_match_details_md(misp, attr, filepath):
         print(f"- **To IDS:** {attr.get('to_ids')}  ")
         comment = attr.get('comment') or ''
         print(f"- **Comment:** {comment}  ")
-        tags = ', '.join(f'`{t['name']}`' for t in attr.get('Tag', []))
+        tags = ', '.join([f"`{t['name']}`" for t in attr.get('Tag', [])])
         print(f"- **Attribute Tags:** {tags if tags else 'None'}")
         print()
         # Event details
@@ -88,7 +87,7 @@ def display_match_details_md(misp, attr, filepath):
         print(f"- **Event ID:** {event.id}")
         print(f"- **Info:** {event.info}")
         print(f"- **Date:** {event.date}")
-        etags = ', '.join(f'`{t.name}`' for t in event.tags)
+        etags = ', '.join([f"`{t.name}`" for t in event.tags])
         print(f"- **Event Tags:** {etags if etags else 'None'}")
         print(f"- **Threat Level:** {event.threat_level_id}")
         print(f"- **Analysis:** {event.analysis}")
