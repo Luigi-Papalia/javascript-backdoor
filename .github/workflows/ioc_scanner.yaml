@@ -30,7 +30,7 @@ jobs:
       - name: Run IOC Matcher
         run: |
           mkdir -p output
-          python ${{ github.workspace }}/utility/ioc_matcher.py --input-folder "$INPUT_FOLDER" --misp-url "$MISP_URL" --misp-key "$MISP_API_KEY" 2>&1 | tee output/ioc-scan.log
+          python ${{ github.workspace }}/utility/ioc_matcher.py --input-folder "$INPUT_FOLDER" --misp-url "$MISP_URL" --misp-key "$MISP_API_KEY" > output/report.md
         continue-on-error: true
 
       - name: Upload scan log
@@ -38,3 +38,9 @@ jobs:
         with:
           name: ioc-scan-log
           path: output/ioc-scan.log
+
+      - name: Publish report to Summary
+        run: |
+          echo "## :warning: IOC Matcher Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          tail -n +2 output/report.md >> $GITHUB_STEP_SUMMARY
