@@ -6,6 +6,7 @@ const app = express();
 const port = 3000;
 const path = require('path');
 
+// DarkComet RATs, just for PoC, not utilised in the code
 const bad_domain_1 = "microsoft.noip.me";
 const bad_domain_2 = "microsoft23.no-ip.org";
 const bad_domain_3 = "microsofthostwds.ddns.net";
