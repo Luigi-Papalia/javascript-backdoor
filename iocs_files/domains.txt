@@ -1,3 +1,0 @@
-# iocs/domains.txt
-malicious.example.com
-bad-domain[.]net

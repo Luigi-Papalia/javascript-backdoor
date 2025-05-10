@@ -1,3 +1,0 @@
-# iocs/hashes.txt
-d41d8cd98f00b204e9800998ecf8427e
-e242ed3bffccdf271b7fbaf34ed72d089537b42f
