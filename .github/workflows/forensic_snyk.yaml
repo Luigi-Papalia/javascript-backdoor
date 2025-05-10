@@ -11,34 +11,7 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ github.ref }}
-
-      - name: Log checkout to Splunk
-        run: |
-          STEP="checkout"
-          START_TS=$(date +%s)
-          COMMIT_SHA=$(git rev-parse --short HEAD)
-          echo "START ${STEP} at $(date -Is)"
-          echo "COMMIT_SHA=${COMMIT_SHA}"
-          EXIT_CODE=0
-          END_TS=$(date +%s)
-          DURATION=$((END_TS-START_TS))
-          echo "END ${STEP} (exit=${EXIT_CODE}, duration=${DURATION}s)"
-          curl -s http://192.168.1.131:8088/services/collector \
-            -H "Authorization: Splunk ${{ secrets.SPLUNK_HEC_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d "$(jq -n \
-                --arg step "$STEP" \
-                --arg status "completed" \
-                --arg exit_code "$EXIT_CODE" \
-                --arg duration "$DURATION" \
-                --arg commit "$COMMIT_SHA" \
-                --arg ts "$(date -Is)" \
-                '{sourcetype:"_json", event:{step:$step,status:$status,exit_code:$exit_code,duration_s:$duration,commit:$commit,timestamp:$ts}}')"
+      - uses: actions/checkout@v4
 
       - name: Set up Node.js
         run: |
