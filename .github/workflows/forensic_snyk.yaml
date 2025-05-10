@@ -49,13 +49,11 @@ jobs:
               --arg run_id "$GITHUB_RUN_ID" \
               --arg repo "$GITHUB_REPOSITORY" \
               --arg workflow "$GITHUB_WORKFLOW" \
-              --arg logs "$(sed 's/"/\\"/g' workflow.log)" \
               '{ 
                  event: {
                    run_id: $run_id,
                    repository: $repo,
                    workflow: $workflow,
-                   logs: $logs
                  },
                  sourcetype: "github:actions:sca"
                }'
