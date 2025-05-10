@@ -45,24 +45,23 @@ jobs:
 
       - name: Forward logs and metadata to Splunk
         run: |
-          # Build JSON payload with metadata and logs
           payload=$(
             jq -n \
               --arg run_id "$GITHUB_RUN_ID" \
               --arg repo "$GITHUB_REPOSITORY" \
               --arg workflow "$GITHUB_WORKFLOW" \
-              --arglogs "$(sed 's/"/\\"/g' workflow.log)" \
+              --arg logs "$(sed 's/"/\\"/g' workflow.log)" \
               '{ 
-                event: {
-                  run_id: $run_id,
-                  repository: $repo,
-                  workflow: $workflow,
-                  logs: $logs
-                },
-                sourcetype: "github:actions:sca"
-              }'
+                 event: {
+                   run_id: $run_id,
+                   repository: $repo,
+                   workflow: $workflow,
+                   logs: $logs
+                 },
+                 sourcetype: "github:actions:sca"
+               }'
           )
-          # Send to Splunk HEC
+
           curl -k "${SPLUNK_HEC_ENDPOINT}" \
             -H "Authorization: Splunk ${SPLUNK_HEC_TOKEN}" \
             -H "Content-Type: application/json" \
