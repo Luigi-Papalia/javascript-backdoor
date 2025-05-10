@@ -46,17 +46,81 @@ jobs:
         run: |
           payload=$(
             jq -n \
-              --arg run_id "$GITHUB_RUN_ID" \
-              --arg repo "$GITHUB_REPOSITORY" \
-              --arg workflow "$GITHUB_WORKFLOW" \
+              --arg github_action "GITHUB_ACTION" \
+              --arg github_action_path "GITHUB_ACTION_PATH" \
+              --arg github_action_repository "GITHUB_ACTION_REPOSITORY" \
+              --arg github_actions "GITHUB_ACTIONS" \
+              --arg github_actor "GITHUB_ACTOR" \
+              --arg github_api_url "GITHUB_API_URL" \
+              --arg github_base_ref "GITHUB_BASE_REF" \
+              --arg github_env "GITHUB_ENV" \
+              --arg github_event_name "GITHUB_EVENT_NAME" \
+              --arg github_event_path "GITHUB_EVENT_PATH" \
+              --arg github_graphql_url "GITHUB_GRAPHQL_URL" \
+              --arg github_head_ref "GITHUB_HEAD_REF" \
+              --arg github_job "GITHUB_JOB" \
+              --arg github_path "GITHUB_PATH" \
+              --arg github_ref "GITHUB_REF" \
+              --arg github_ref_name "GITHUB_REF_NAME" \
+              --arg github_ref_protected "GITHUB_REF_PROTECTED" \
+              --arg github_ref_type "GITHUB_REF_TYPE" \
+              --arg github_repository_owner "GITHUB_REPOSITORY_OWNER" \
+              --arg github_repository_owner_id "GITHUB_REPOSITORY_OWNER_ID" \
+              --arg github_retention_days "GITHUB_RETENTION_DAYS" \
+              --arg github_run_attempt "GITHUB_RUN_ATTEMPT" \
+              --arg github_run_number "GITHUB_RUN_NUMBER" \
+              --arg github_server_url "GITHUB_SERVER_URL" \
+              --arg github_sha "GITHUB_SHA" \
+              --arg github_step_summary "GITHUB_STEP_SUMMARY" \
+              --arg github_token "GITHUB_TOKEN" \
+              --arg github_triggering_actor "GITHUB_TRIGGERING_ACTOR" \
+              --arg github_workspace "GITHUB_WORKSPACE" \
+              --arg runner_arch "RUNNER_ARCH" \
+              --arg runner_debug "RUNNER_DEBUG" \
+              --arg runner_name "RUNNER_NAME" \
+              --arg runner_os "RUNNER_OS" \
+              --arg runner_temp "RUNNER_TEMP" \
+              --arg runner_tool_cache "RUNNER_TOOL_CACHE" \
               '{ 
-                 event: {
-                   run_id: $run_id,
-                   repository: $repo,
-                   workflow: $workflow,
-                 },
-                 sourcetype: "github:actions:sca"
-               }'
+                event: {
+              		github_action: $github_action,
+              		github_action_path: $github_action_path,
+              		github_action_repository: $github_action_repository,
+              		github_actions: $github_actions,
+              		github_actor: $github_actor,
+              		github_api_url: $github_api_url,
+              		github_base_ref: $github_base_ref,
+              		github_env: $github_env,
+              		github_event_name: $github_event_name,
+              		github_event_path: $github_event_path,
+              		github_graphql_url: $github_graphql_url,
+              		github_head_ref: $github_head_ref,
+              		github_job: $github_job,
+              		github_path: $github_path,
+              		github_ref: $github_ref,
+              		github_ref_name: $github_ref_name,
+              		github_ref_protected: $github_ref_protected,
+              		github_ref_type: $github_ref_type,
+              		github_repository_owner: $github_repository_owner,
+              		github_repository_owner_id: $github_repository_owner_id,
+              		github_retention_days: $github_retention_days,
+              		github_run_attempt: $github_run_attempt,
+              		github_run_number: $github_run_number,
+              		github_server_url: $github_server_url,
+              		github_sha: $github_sha,
+              		github_step_summary: $github_step_summary,
+              		github_token: $github_token,
+              		github_triggering_actor: $github_triggering_actor,
+              		github_workspace: $github_workspace,
+              		runner_arch: $runner_arch,
+              		runner_debug: $runner_debug,
+              		runner_name: $runner_name,
+              		runner_os: $runner_os,
+              		runner_temp: $runner_temp,
+              		runner_tool_cache: $runner_tool_cache
+              	},
+              	sourcetype: "github:actions:sca"
+              }'
           )
 
           curl -k "${SPLUNK_HEC_ENDPOINT}" \
