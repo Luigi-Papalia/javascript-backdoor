@@ -31,7 +31,6 @@ jobs:
       - name: Run IOC Matcher
         run: |
           mkdir -p output
-          # capture stdout+stderr to a log file
           python ioc_matcher.py 2>&1 | tee output/ioc-scan.log
         continue-on-error: true
 
