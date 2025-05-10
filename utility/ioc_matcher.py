@@ -117,7 +117,7 @@ def main():
     # Collect IOCs
     extensions = {'txt', 'js', 'yaml', 'json', 'html', 'Dockerfile'}
     ioc_sources = collect_iocs(args.input_folder, extensions)
-    print(f"- **Total unique IOCs:** {len(ioc_sources)}  ")
+    print(f"- **Total unique possible IOCs extracted from repository:** {len(ioc_sources)}  ")
     print()
 
     # Process IOCs
