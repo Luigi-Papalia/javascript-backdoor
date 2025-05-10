@@ -6,6 +6,8 @@ const app = express();
 const port = 3000;
 const path = require('path');
 
+const c2ioc = "www.minergate.com"; // Just for PoC, real IoC used in SolarWinds SUNBURST backdoor
+
 // support for encoded URLs and static files
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
