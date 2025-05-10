@@ -33,11 +33,11 @@ jobs:
           python ${{ github.workspace }}/utility/ioc_matcher.py --input-folder "$INPUT_FOLDER" --misp-url "$MISP_URL" --misp-key "$MISP_API_KEY" > output/report.md
         continue-on-error: true
 
-      - name: Upload scan log
-        uses: actions/upload-artifact@v4
+      - name: Upload full report artifact
+        uses: actions/upload-artifact@v3
         with:
-          name: ioc-scan-log
-          path: output/ioc-scan.log
+          name: ioc-report-md
+          path: output/report.md
 
       - name: Publish report to Summary
         run: |
