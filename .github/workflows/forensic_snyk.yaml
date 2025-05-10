@@ -11,18 +11,23 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref }}
+
+      - name: Log checkout to Splunk
         run: |
           STEP="checkout"
           START_TS=$(date +%s)
           COMMIT_SHA=$(git rev-parse --short HEAD)
-          echo "START $STEP at $(date -Is)"
-          echo "COMMIT_SHA=$COMMIT_SHA"
-          git checkout ${{ github.sha }}
-          EXIT_CODE=$?
+          echo "START ${STEP} at $(date -Is)"
+          echo "COMMIT_SHA=${COMMIT_SHA}"
+          EXIT_CODE=0
           END_TS=$(date +%s)
           DURATION=$((END_TS-START_TS))
-          echo "END $STEP (exit=$EXIT_CODE, duration=${DURATION}s)"
+          echo "END ${STEP} (exit=${EXIT_CODE}, duration=${DURATION}s)"
           curl -s http://192.168.1.131:8088/services/collector \
             -H "Authorization: Splunk ${{ secrets.SPLUNK_HEC_TOKEN }}" \
             -H "Content-Type: application/json" \
