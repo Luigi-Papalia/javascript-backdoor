@@ -79,7 +79,7 @@ def display_match_details_md(misp, attr, filepath):
         print(f"- **To IDS:** {attr.get('to_ids')}  ")
         comment = attr.get('comment') or ''
         print(f"- **Comment:** {comment}  ")
-        tags = ', '.join(f'`{t['name']}`' for t in attr.get('Tag', []))
+        tags = ', '.join(f'`{t["name"]}`' for t in attr.get('Tag', []))
         print(f"- **Attribute Tags:** {tags if tags else 'None'}")
         print()
         # Event details
