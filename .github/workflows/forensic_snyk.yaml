@@ -1,4 +1,4 @@
-name: SCA with Snyk
+name: Forensic Analysis SCA with Snyk
 
 on:
   workflow_dispatch:
