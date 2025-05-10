@@ -52,6 +52,8 @@ def collect_iocs(input_folder, extensions):
 
                 for lst in find_iocs(content).values():
                     for ioc in lst:
+                        if ioc == '0.0.0.0':
+                            continue
                         ioc_sources[ioc].add(path)
     return ioc_sources
 
