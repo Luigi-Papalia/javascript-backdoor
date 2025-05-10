@@ -8,7 +8,7 @@ permissions:
 
 env:
   # Make HEC endpoint and token available in all steps
-  SPLUNK_HEC_ENDPOINT: "https://192.168.1.131:8088/services/collector/event"
+  SPLUNK_HEC_ENDPOINT: "https://192.168.1.131:8088/services/collector"
   SPLUNK_HEC_TOKEN: ${{ secrets.SPLUNK_HEC_TOKEN }}
 
 jobs:
