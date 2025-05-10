@@ -6,26 +6,13 @@ const app = express();
 const port = 3000;
 const path = require('path');
 
-const domain1 = "eternalrussia.com";
-const domain2 = "minergate.com";
-const domain3 = "webbly.com";
-const domain4 = "jobvn.com";
-const domain5 = "emotet.com";
-const domain6 = "trickbot.com";
-const domain7 = "revil.ru";
-const domain8 = "contirec.xyz";
-const domain9 = "lockbitapt.com";
-const domain10 = "blackbasta.com";
-const domain11 = "microsoft-support.com";
-const domain12 = "office365-login.live";
-const domain13 = "paypa1.com";
-const domain14 = "chase-secure.net";
-const domain15 = "update.mirai.com";
-const domain16 = "qakbot.com";
-const domain17 = "tunngle.net";
-const domain18 = "linkedin-jobs.org";
-const domain19 = "lockbit7.ru";
-const domain20 = "stn.sh";
+const bad_domain_1 = "microsoft.noip.me";
+const bad_domain_2 = "microsoft23.no-ip.org";
+const bad_domain_3 = "microsofthostwds.ddns.net";
+const bad_domain_4 = "microsoftnet.duckdns.org";
+const bad_domain_5 = "microsoftnet.no-ip.org";
+const bad_domain_6 = "microsoftupdate.authorizeddns.org";
+const bad_domain_7 = "microsoftupdate.webhop.me";
 
 // support for encoded URLs and static files
 app.use(express.urlencoded({ extended: true }));
