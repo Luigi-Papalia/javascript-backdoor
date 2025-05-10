@@ -25,12 +25,11 @@ def parse_args():
                         help="Verify SSL certificates for MISP API calls")
     return parser.parse_args()
 
-# ── 1) Setup and Initialization ──────────────────────────────────────────────────
-def initialize(args):
-    # Initialize MISP client with connection pooling
-    misp = PyMISP(args.misp_url, args.misp_key, ssl=args.verify_cert)
+# ── Initialize MISP with connection pooling ────────────────────────────────────
+def initialize_misp(url, key, verify):
+    misp = PyMISP(url, key, ssl=verify)
     session = misp._PyMISP__session
-    session.verify = args.verify_cert
+    session.verify = verify
     adapter = HTTPAdapter(pool_connections=10, pool_maxsize=50)
     session.mount('https://', adapter)
     session.mount('http://', adapter)
@@ -70,6 +69,7 @@ def cached_search(misp, ioc):
 def display_match_details_md(misp, attr, filepath):
     try:
         event = misp.get_event(attr['event_id'], pythonify=True)
+        # Markdown header for each alert
         print(f"## :warning: Alert: Match found (file: `{filepath}`)")
         print()
         # IOC details
@@ -79,7 +79,7 @@ def display_match_details_md(misp, attr, filepath):
         print(f"- **To IDS:** {attr.get('to_ids')}  ")
         comment = attr.get('comment') or ''
         print(f"- **Comment:** {comment}  ")
-        tags = ', '.join([f"`{t['name']}`" for t in attr.get('Tag', [])])
+        tags = ', '.join(f'`{t['name']}`' for t in attr.get('Tag', []))
         print(f"- **Attribute Tags:** {tags if tags else 'None'}")
         print()
         # Event details
@@ -87,7 +87,7 @@ def display_match_details_md(misp, attr, filepath):
         print(f"- **Event ID:** {event.id}")
         print(f"- **Info:** {event.info}")
         print(f"- **Date:** {event.date}")
-        etags = ', '.join([f"`{t.name}`" for t in event.tags])
+        etags = ', '.join(f'`{t.name}`' for t in event.tags)
         print(f"- **Event Tags:** {etags if etags else 'None'}")
         print(f"- **Threat Level:** {event.threat_level_id}")
         print(f"- **Analysis:** {event.analysis}")
