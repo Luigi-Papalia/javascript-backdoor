@@ -8,7 +8,7 @@ permissions:
   security-events: write
 
 env:
-  SPLUNK_HEC_ENDPOINT: ${{ env.SPLUNK_HEC_ENDPOINT }}
+  SPLUNK_HEC_ENDPOINT: "http://192.168.1.131:8000"
   SPLUNK_HEC_TOKEN: ${{ secrets.SPLUNK_HEC_TOKEN }}
 
 jobs:
