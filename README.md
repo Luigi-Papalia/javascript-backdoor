@@ -4,21 +4,6 @@ This repository contains a deliberately insecure Node.js microservice, intended 
 
 ---
 
-## Table of Contents
-
-- Features
-- Security Vulnerabilities
-- Requirements
-- Installation
-- Usage
-- **API Endpoints (Detailed)**
-- Docker \& Kubernetes Deployment
-- File Structure
-- Disclaimer
-- Download
-
----
-
 ## Features
 
 - Simple Express.js web server
