@@ -1,7 +1,8 @@
 name: SCA + Forensic Logging + Splunk HEC
 
 on:
-  workflow_dispatch:
+  repository_dispatch:
+    types: [snyk-scan-forensic]
 
 permissions:
   security-events: write
