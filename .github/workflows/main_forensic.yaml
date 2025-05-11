@@ -1,0 +1,88 @@
+name: Full pipeline (with forensic analysis tools enabled)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  trigger-sca:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger and Wait for SCA (Snyk + Splunk)
+        uses: felixp8/dispatch-and-wait@v0.1.0
+        with:
+          owner: ${{ github.repository_owner }}
+          repo: ${{ github.event.repository.name }}
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          event_type: snyk-scan-forensic
+          wait_time: 10
+          max_time: 600
+
+  trigger-sast:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger and Wait for SAST (Semgrep)
+        uses: felixp8/dispatch-and-wait@v0.1.0
+        with:
+          owner: ${{ github.repository_owner }}
+          repo: ${{ github.event.repository.name }}
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          event_type: sast-semgrep
+          wait_time: 10
+          max_time: 600
+
+  trigger-dast:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger and Wait for DAST (OWASP ZAP)
+        uses: felixp8/dispatch-and-wait@v0.1.0
+        with:
+          owner: ${{ github.repository_owner }}
+          repo: ${{ github.event.repository.name }}
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          event_type: dast-zap
+          wait_time: 10
+          max_time: 600
+
+  trigger-yara:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger and Wait for YARA scan
+        uses: felixp8/dispatch-and-wait@v0.1.0
+        with:
+          owner: ${{ github.repository_owner }}
+          repo: ${{ github.event.repository.name }}
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          event_type: yara-scan
+          wait_time: 10
+          max_time: 600
+  
+  trigger-iac:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger and Wait for IaC (Trivy)
+        uses: felixp8/dispatch-and-wait@v0.1.0
+        with:
+          owner: ${{ github.repository_owner }}
+          repo: ${{ github.event.repository.name }}
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          event_type: iac-trivy
+          wait_time: 10
+          max_time: 600
+
+  trigger-publish:
+    needs:
+      - trigger-sca
+      - trigger-sast
+      - trigger-dast
+      - trigger-iac
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish Image (with Falco)
+        uses: felixp8/dispatch-and-wait@v0.1.0
+        with:
+          owner: ${{ github.repository_owner }}
+          repo: ${{ github.event.repository.name }}
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          event_type: publish-image
+          wait_time: 10
+          max_time: 600
