@@ -25,7 +25,7 @@ This repository contains a deliberately insecure Node.js microservice, intended 
 - In-memory SQLite database with test users
 - Login form (no session management)
 - Vulnerable endpoints for XSS and code injection demonstration
-- Serves static files from `public/`
+- Serves static files from `/`
 - Dockerfile and Kubernetes deployment YAML included
 
 ---
