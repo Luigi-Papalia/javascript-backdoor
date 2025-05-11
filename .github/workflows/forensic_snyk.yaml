@@ -48,7 +48,7 @@ jobs:
           npm install 2>&1 | tee -a workflow.log
 
       - name: Upload install logs
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: npm-install-log-${{ github.run_id }}
           path: workflow.log
@@ -62,7 +62,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload SARIF
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: snyk-sarif-${{ github.run_id }}
           path: snyk.sarif
