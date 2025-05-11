@@ -1,4 +1,4 @@
-name: SCA with Snyk + Splunk Forwarding
+name: 🔍 SCA + Forensic Logging + Splunk HEC
 
 on:
   workflow_dispatch:
@@ -13,18 +13,45 @@ env:
 jobs:
   snyk:
     runs-on: self-hosted
+
+    permissions:
+      contents: read
+      security-events: write
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@942d3cb5a3f9e7e8a2b4d5fab8c8c3e3b4d5c6f7
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
 
-      - name: Install dependencies (and log)
+      - name: Forensic snapshot
         run: |
-          echo "=== npm install ===" | tee -a workflow.log
+          mkdir -p forensic
+          uname -a > forensic/os.txt
+          npm ls --all > forensic/npm-packages.txt
+          env > forensic/env.txt
+          find . -type f -exec sha256sum {} \; > forensic/checksums.txt
+        shell: bash
+
+      - name: Upload forensic snapshot
+        uses: actions/upload-artifact@v3
+        with:
+          name: forensic-snapshot-${{ github.run_id }}
+          path: forensic/
+
+      - name: Install dependencies
+        run: |
+          echo "=== npm install $(date --iso-8601=seconds) ===" | tee workflow.log
           npm install 2>&1 | tee -a workflow.log
+
+      - name: Upload install logs
+        uses: actions/upload-artifact@v3
+        with:
+          name: npm-install-log-${{ github.run_id }}
+          path: workflow.log
 
       - name: Run Snyk SCA and output SARIF (and log)
         uses: snyk/actions/node@master
@@ -34,96 +61,40 @@ jobs:
           args: --sarif-file-output=snyk.sarif
         continue-on-error: true
 
-      - name: Print SARIF to log
-        run: cat snyk.sarif | tee -a workflow.log
+      - name: Upload SARIF
+        uses: actions/upload-artifact@v3
+        with:
+          name: snyk-sarif-${{ github.run_id }}
+          path: snyk.sarif
 
-      - name: Upload SARIF to GitHub
+      - name: Upload SARIF to GitHub (Code Scanning)
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: snyk.sarif
 
-      - name: Forward logs and metadata to Splunk
+      - name: Forward metadata (JSON) to Splunk HEC
         run: |
-          payload=$(
-            jq -n \
-              --arg github_action "$GITHUB_ACTION" \
-              --arg github_action_path "$GITHUB_ACTION_PATH" \
-              --arg github_action_repository "$GITHUB_ACTION_REPOSITORY" \
-              --arg github_actions "$GITHUB_ACTIONS" \
-              --arg github_actor "$GITHUB_ACTOR" \
-              --arg github_api_url "$GITHUB_API_URL" \
-              --arg github_base_ref "$GITHUB_BASE_REF" \
-              --arg github_env "$GITHUB_ENV" \
-              --arg github_event_name "$GITHUB_EVENT_NAME" \
-              --arg github_event_path "$GITHUB_EVENT_PATH" \
-              --arg github_graphql_url "$GITHUB_GRAPHQL_URL" \
-              --arg github_head_ref "$GITHUB_HEAD_REF" \
-              --arg github_job "$GITHUB_JOB" \
-              --arg github_path "$GITHUB_PATH" \
-              --arg github_ref "$GITHUB_REF" \
-              --arg github_ref_name "$GITHUB_REF_NAME" \
-              --arg github_ref_protected "$GITHUB_REF_PROTECTED" \
-              --arg github_ref_type "$GITHUB_REF_TYPE" \
-              --arg github_repository_owner "$GITHUB_REPOSITORY_OWNER" \
-              --arg github_repository_owner_id "$GITHUB_REPOSITORY_OWNER_ID" \
-              --arg github_retention_days "$GITHUB_RETENTION_DAYS" \
-              --arg github_run_attempt "$GITHUB_RUN_ATTEMPT" \
-              --arg github_run_number "$GITHUB_RUN_NUMBER" \
-              --arg github_server_url "$GITHUB_SERVER_URL" \
-              --arg github_sha "$GITHUB_SHA" \
-              --arg github_step_summary "$GITHUB_STEP_SUMMARY" \
-              --arg github_token "$GITHUB_TOKEN" \
-              --arg github_triggering_actor "$GITHUB_TRIGGERING_ACTOR" \
-              --arg github_workspace "$GITHUB_WORKSPACE" \
-              --arg runner_arch "$RUNNER_ARCH" \
-              --arg runner_debug "$RUNNER_DEBUG" \
-              --arg runner_name "$RUNNER_NAME" \
-              --arg runner_os "$RUNNER_OS" \
-              --arg runner_temp "$RUNNER_TEMP" \
-              --arg runner_tool_cache "$RUNNER_TOOL_CACHE" \
-              '{ 
-                event: {
-              		github_action: $github_action,
-              		github_action_path: $github_action_path,
-              		github_action_repository: $github_action_repository,
-              		github_actions: $github_actions,
-              		github_actor: $github_actor,
-              		github_api_url: $github_api_url,
-              		github_base_ref: $github_base_ref,
-              		github_env: $github_env,
-              		github_event_name: $github_event_name,
-              		github_event_path: $github_event_path,
-              		github_graphql_url: $github_graphql_url,
-              		github_head_ref: $github_head_ref,
-              		github_job: $github_job,
-              		github_path: $github_path,
-              		github_ref: $github_ref,
-              		github_ref_name: $github_ref_name,
-              		github_ref_protected: $github_ref_protected,
-              		github_ref_type: $github_ref_type,
-              		github_repository_owner: $github_repository_owner,
-              		github_repository_owner_id: $github_repository_owner_id,
-              		github_retention_days: $github_retention_days,
-              		github_run_attempt: $github_run_attempt,
-              		github_run_number: $github_run_number,
-              		github_server_url: $github_server_url,
-              		github_sha: $github_sha,
-              		github_step_summary: $github_step_summary,
-              		github_token: $github_token,
-              		github_triggering_actor: $github_triggering_actor,
-              		github_workspace: $github_workspace,
-              		runner_arch: $runner_arch,
-              		runner_debug: $runner_debug,
-              		runner_name: $runner_name,
-              		runner_os: $runner_os,
-              		runner_temp: $runner_temp,
-              		runner_tool_cache: $runner_tool_cache
-              	},
-              	sourcetype: "github:actions:sca"
-              }'
-          )
-
-          curl -k "${SPLUNK_HEC_ENDPOINT}" \
-            -H "Authorization: Splunk ${SPLUNK_HEC_TOKEN}" \
+          # Build a small JSON payload with key GitHub context + forensic summary
+          jq -n --arg run_id "$GITHUB_RUN_ID" \
+                --arg repo    "$GITHUB_REPOSITORY" \
+                --arg actor   "$GITHUB_ACTOR" \
+                --arg commit  "$GITHUB_SHA" \
+                --arg ref     "$GITHUB_REF" \
+                --arg time "$(date +%s)" \
+            '{
+               event: {
+                 run_id: $run_id,
+                 repository: $repo,
+                 actor: $actor,
+                 commit: $commit,
+                 ref: $ref,
+                 timestamp: $time
+               },
+               sourcetype: "github:actions:snyk"
+             }' \
+          | gzip | \
+          curl -k "$SPLUNK_HEC_ENDPOINT/services/collector/event" \
+            -H "Authorization: Splunk $SPLUNK_HEC_TOKEN" \
             -H "Content-Type: application/json" \
-            -d "$payload"
+            -H "Content-Encoding: gzip" \
+            --data-binary @-
