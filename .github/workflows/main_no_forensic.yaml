@@ -13,7 +13,7 @@ jobs:
           owner: ${{ github.repository_owner }}
           repo: ${{ github.event.repository.name }}
           github_token: ${{ secrets.REPO_ACCESS_TOKEN }}
-          workflow_file_name: sca-snyk.yml
+          workflow_file_name: snyk.yaml
           ref: main
           wait_interval: 10
           propagate_failure: true
