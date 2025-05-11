@@ -27,18 +27,69 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Record checksums BEFORE install
+        run: |
+          find . -type f ! -path './node_modules/*' -exec sha256sum {} \; | sort > checksums-before.txt
+        shell: bash
+      
       - name: Install dependencies
         run: |
-          echo "=== npm install $(date --iso-8601=seconds) ===" | tee workflow.log
-          npm install 2>&1 | tee -a workflow.log
+          echo "=== npm install $(date --iso-8601=seconds) ===" | tee install.log
+          npm install 2>&1 | tee -a install.log
+
+      - name: Record checksums AFTER install
+        run: |
+          find . -type f ! -path './node_modules/*' -exec sha256sum {} \; | sort > checksums-after.txt
+        shell: bash
+
+      - name: Compare checksums and alert on mismatch
+        run: |
+          if ! diff --brief checksums-before.txt checksums-after.txt >/dev/null; then
+            echo "File checksum mismatch detected after npm install" >&2
+            payload=$(
+              jq -n \
+                --arg job     "$GITHUB_JOB" \
+                --arg run     "$GITHUB_RUN_ID" \
+                --arg url     "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+                '{ 
+                  event: {
+                    level:   "critical",
+                    message: "Checksum mismatch detected after npm install, a file has been overwritten",
+                    job:     $job,
+                    run_id:  $run,
+                    url:     $url
+                  },
+                  sourcetype: "github:actions:forensics"
+                }'
+            )
+            # Send to Splunk HEC
+            curl -k "${SPLUNK_HEC_ENDPOINT}/services/collector/event" \
+              -H "Authorization: Splunk ${SPLUNK_HEC_TOKEN}" \
+              -H "Content-Type: application/json" \
+              -d "$payload"
+            # In a real environment, uncomment the exit and comment the echo
+            # exit 1
+            echo "Checksum mismatch!"
+          else
+            echo "Checksums match; proceeding."
+          fi
+        shell: bash
+
+      - name: Archive installation logs and checksum files
+        uses: actions/upload-artifact@v4
+        with:
+          name: install-and-checksums-${{ github.run_id }}
+          path: |
+            install.log
+            checksums-before.txt
+            checksums-after.txt
       
-      - name: Forensic snapshot
+      - name: Forensic Environment Snapshot
         run: |
           mkdir -p forensic
           uname -a > forensic/os.txt
           npm ls --all > forensic/npm-packages.txt
           env > forensic/env.txt
-          find . -type f -not -path "*/node_modules/*" -not -path "*/.git/*" -exec sha256sum {} \; > forensic/checksums.txt
         shell: bash
 
       - name: Upload forensic snapshot
@@ -51,7 +102,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: npm-install-log-${{ github.run_id }}
-          path: workflow.log
+          path: install.log
 
       - name: Run Snyk SCA and output SARIF (and log)
         uses: snyk/actions/node@master
