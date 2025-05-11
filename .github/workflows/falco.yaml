@@ -1,7 +1,8 @@
-on:
-  workflow_dispatch:
-
 name: Publish Image (With Falco)
+
+on:
+  repository_dispatch:
+    types: [publish-image]
 
 permissions:
   packages: write
@@ -34,13 +35,13 @@ jobs:
 
         for i in {1..30}; do
           if docker ps --filter "name=falco" --filter "status=running" | grep -q falco; then
-            echo "Falco is running!!!!!!!!!"
+            echo "Falco is running!"
             break
           fi
           echo "Waiting...."
           sleep 1
         done
-        
+    # -v /home/garou/sandbox/javascript:/javascript:rw \
     - name: Start Sysdig
       run: |      
         docker run --rm -d --name sysdig --privileged \
@@ -48,27 +49,18 @@ jobs:
           -v /dev:/host/dev -v /proc:/host/proc:ro \
           -v /boot:/host/boot:ro \
           -v /lib/modules:/host/lib/modules:ro \
-          -v /home/garou/sandbox/javascript:/javascript:rw \
           -v /usr:/host/usr:ro \
           -v /tmp:/tmp \
           --net=host sysdig/sysdig:latest sysdig --modern-bpf -w /tmp/capture.scap --snaplen=256 "not evt.type in (switch)"
 
         for i in {1..30}; do
           if docker ps --filter "name=sysdig" --filter "status=running" | grep -q sysdig; then
-            echo "Sysdig is running!!!!!!!!!"
+            echo "Sysdig is running!"
             break
           fi
           echo "Waiting...."
           sleep 1
         done
-
-    #- name: Publish the image
-    #  run: |
-    #     [[ -f /tmp/falco_events.json ]] && cat /tmp/falco_events.json 
-    #    npm install
-    #    echo "stopping containers"
-    #    docker stop falco
-    #    docker stop sysdig
 
     - name: Log in to GitHub Container Registry
       uses: docker/login-action@v3
