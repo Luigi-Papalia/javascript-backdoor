@@ -7,49 +7,74 @@ jobs:
   trigger-sca:
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger SCA (Snyk)
-        uses: peter-evans/repository-dispatch@v3
+      - name: Trigger and Wait for SCA (Snyk)
+        uses: convictional/trigger-workflow-and-wait@v1.6.1
         with:
-          token: ${{ secrets.REPO_ACCESS_TOKEN }}
-          event-type: sca-snyk
+          owner: ${{ github.repository_owner }}
+          repo: ${{ github.event.repository.name }}
+          github_token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          workflow_file_name: sca-snyk.yml
+          ref: main
+          wait_interval: 10
+          propagate_failure: true
 
   trigger-sast:
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger SAST (Semgrep)
-        uses: peter-evans/repository-dispatch@v3
+      - name: Trigger and Wait for SAST (Semgrep)
+        uses: convictional/trigger-workflow-and-wait@v1.6.1
         with:
-          token: ${{ secrets.REPO_ACCESS_TOKEN }}
-          event-type: sast-semgrep
+          owner: ${{ github.repository_owner }}
+          repo: ${{ github.event.repository.name }}
+          github_token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          workflow_file_name: sast-semgrep.yml
+          ref: main
+          wait_interval: 10
+          propagate_failure: true
 
   trigger-dast:
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger DAST (OWASP ZAP)
-        uses: peter-evans/repository-dispatch@v3
+      - name: Trigger and Wait for DAST (OWASP ZAP)
+        uses: convictional/trigger-workflow-and-wait@v1.6.1
         with:
-          token: ${{ secrets.REPO_ACCESS_TOKEN }}
-          event-type: dast-zap
+          owner: ${{ github.repository_owner }}
+          repo: ${{ github.event.repository.name }}
+          github_token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          workflow_file_name: dast-zap.yml
+          ref: main
+          wait_interval: 10
+          propagate_failure: true
 
   trigger-iac:
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger IaC (Trivy)
-        uses: peter-evans/repository-dispatch@v3
+      - name: Trigger and Wait for IaC (Trivy)
+        uses: convictional/trigger-workflow-and-wait@v1.6.1
         with:
-          token: ${{ secrets.REPO_ACCESS_TOKEN }}
-          event-type: iac-trivy
+          owner: ${{ github.repository_owner }}
+          repo: ${{ github.event.repository.name }}
+          github_token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          workflow_file_name: iac-trivy.yml
+          ref: main
+          wait_interval: 10
+          propagate_failure: true
 
   trigger-publish:
     needs:
-        - trigger-sca
-        - trigger-sast
-        - trigger-dast
-        - trigger-iac
+      - trigger-sca
+      - trigger-sast
+      - trigger-dast
+      - trigger-iac
     runs-on: ubuntu-latest
     steps:
-      - name: Publish Image (with Falco)
-        uses: peter-evans/repository-dispatch@v3
+      - name: Trigger and Wait for Publish Image (with Falco)
+        uses: convictional/trigger-workflow-and-wait@v1.6.1
         with:
-          token: ${{ secrets.REPO_ACCESS_TOKEN }}
-          event-type: publish-image
+          owner: ${{ github.repository_owner }}
+          repo: ${{ github.event.repository.name }}
+          github_token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          workflow_file_name: publish-image.yml
+          ref: main
+          wait_interval: 10
+          propagate_failure: true
