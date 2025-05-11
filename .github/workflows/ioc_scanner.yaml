@@ -1,7 +1,8 @@
 name: IOC Finder Scan
 
 on:
-  workflow_dispatch:
+  repository_dispatch:
+    types: [ioc-scan]
 
 jobs:
   scan:
