@@ -1,61 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vulnerable Microservice Usage</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        h1, h2 {
-            color: #333;
-        }
-        .endpoint {
-            margin-top: 20px;
-            border: 1px solid #ccc;
-            padding: 10px;
-        }
-        .vulnerability {
-            color: red;
-            font-weight: bold;
-        }
-        .attack-example {
-            background-color: #f0f0f0;
-            padding: 5px;
-            margin-top: 5px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Vulnerable Node.js Microservice - Usage & Demo</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #fafafa; margin: 0; padding: 2em; }
+    h1, h2 { color: #b22222; }
+    code, pre { background: #f4f4f4; padding: 2px 6px; border-radius: 3px; }
+    .endpoint { background: #fff; border-left: 4px solid #b22222; margin: 1em 0; padding: 1em; }
+    .vuln { color: #b22222; font-weight: bold; }
+    .warn { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; padding: 1em; border-radius: 5px; margin: 1em 0; }
+    ul { margin-top: 0; }
+    .footer { margin-top: 2em; font-size: 0.9em; color: #888; }
+  </style>
 </head>
 <body>
-    <h1>Vulnerable JavaScript Microservice</h1>
-    <p>This page explains how to use the intentionally vulnerable endpoints of this microservice and demonstrates potential attacks.</p>
+  <h1>Vulnerable Node.js Microservice</h1>
+  <p>
+    <strong>This application contains a deliberately insecure Node.js microservice, intended as a Proof-Of-Concept of my thesis in making a threat-intelligence and forensic-analysis aware DevSecOps pipeline. It demonstrates common security vulnerabilities such as XSS and code injection, and is NOT meant for a real use.</strong>
+    <br>
+    <span class="vuln">Use "backdoor" to login as root, and do not expose to the public Internet!</span>
+  </p>
 
-    <div class="endpoint">
-        <h2>/greet</h2>
-        <p>This endpoint accepts a 'name' parameter via a query string and displays it in the HTML output.</p>
-        <p class="vulnerability">Vulnerability: Cross-Site Scripting (XSS)</p>
-        <h3>Usage</h3>
-        <p>Access the endpoint with a name parameter:</p>
-        <p class="attack-example"><code>/greet?name=YourName</code></p>
-        <h3>Attack Example</h3>
-        <p>Inject JavaScript code to execute in the user's browser:</p>
-        <p class="attack-example"><code>/greet?name=&lt;script&gt;alert('XSS Attack!')&lt;/script&gt;</code></p>
+  <h2>Endpoints & Usage</h2>
+
+  <div class="endpoint">
+    <h3><code>GET /</code> – Home & Instructions</h3>
+    <p>Displays this help page with usage instructions.</p>
+    <pre>curl http://localhost:3000/</pre>
+  </div>
+
+  <div class="endpoint">
+    <h3><code>GET /login</code> – Login Form</h3>
+    <p>Renders a simple login form. Test users are preloaded in the database:</p>
+    <ul>
+      <li><strong>Username:</strong> root &nbsp; <strong>Password:</strong> pass123 &nbsp; <em>(admin)</em></li>
+      <li><strong>Username:</strong> Luigi &nbsp; <strong>Password:</strong> pass456 &nbsp; <em>(user)</em></li>
+    </ul>
+    <p>Visit in browser or:</p>
+    <pre>curl http://localhost:3000/login</pre>
+    <p>No session or cookie is set after login. Use "backdoor" as username to login as root, no matter what is the password (also empty is fine).</p>
+  </div>
+
+  <div class="endpoint">
+    <h3><code>GET /greet?name=YourName</code> – XSS Demo</h3>
+    <p>
+      Greets the user by name. <span class="vuln">Vulnerable to reflected Cross-Site Scripting (XSS)</span> because input is not sanitized.
+    </p>
+    <pre>curl "http://localhost:3000/greet?name=Alice"</pre>
+    <p>Try injecting JavaScript:</p>
+    <pre>curl "http://localhost:3000/greet?name=&lt;script&gt;alert('XSS!')&lt;/script&gt;"</pre>
+    <div class="warn">
+      <strong>Warning:</strong> Any JavaScript injected via <code>name</code> will be executed in the browser.
     </div>
+  </div>
 
-    <div class="endpoint">
-        <h2>/calculate</h2>
-        <p>This endpoint evaluates a mathematical expression provided in the 'expr' parameter via a query string.</p>
-        <p class="vulnerability">Vulnerability: Code Injection</p>
-        <h3>Usage</h3>
-        <p>Access the endpoint with an expression parameter:</p>
-        <p class="attack-example"><code>/calculate?expr=2+2</code></p>
-        <h3>Attack Example</h3>
-        <p>Execute arbitrary JavaScript code on the server:</p>
-        <p class="attack-example"><code>/calculate?expr=process.exit(1)</code></p>
+  <div class="endpoint">
+    <h3><code>GET /calculate?expr=EXPRESSION</code> – Code Injection Demo</h3>
+    <p>
+      Evaluates a JavaScript expression on the server. <span class="vuln">Vulnerable to code injection</span> via <code>eval()</code>.
+    </p>
+    <pre>curl "http://localhost:3000/calculate?expr=2*2"</pre>
+    <p>Try arbitrary code execution (dangerous!):</p>
+    <pre>curl "http://localhost:3000/calculate?expr=process.env"</pre>
+    <div class="warn">
+      <strong>Warning:</strong> Any JavaScript expression is executed on the server. This is extremely dangerous.
     </div>
+  </div>
 
-    <p><b>Disclaimer:</b> This microservice is intentionally vulnerable for demonstration purposes. Do not deploy this code in a production environment.</p>
+  <div class="endpoint">
+    <h3><code>GET /robots.txt</code></h3>
+    <p>Returns the robots.txt file.</p>
+    <pre>curl http://localhost:3000/robots.txt</pre>
+  </div>
+
+  <h2>Quick Start</h2>
+  <ol>
+    <li>Install dependencies: <code>npm install</code></li>
+    <li>Start the server: <code>node server.js</code></li>
+    <li>Open <a href="http://localhost:3000" target="http://localhost:3000">http://localhost:3000</a> in your browser</li>
+  </ol>
+
+  <div class="footer">
+    &copy; 2025 Luigi Papalia &mdash; <a href="https://github.com/Luigi-Papalia/javascript-backdoor" target="https://github.com/Luigi-Papalia/javascript-backdoor">GitHub</a>
+  </div>
 </body>
 </html>
