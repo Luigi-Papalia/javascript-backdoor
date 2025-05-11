@@ -1,4 +1,4 @@
-name: 🔍 SCA + Forensic Logging + Splunk HEC
+name: SCA + Forensic Logging + Splunk HEC
 
 on:
   workflow_dispatch:
@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@942d3cb5a3f9e7e8a2b4d5fab8c8c3e3b4d5c6f7
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
