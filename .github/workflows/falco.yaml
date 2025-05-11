@@ -1,11 +1,8 @@
 name: Publish Image (With Falco)
 
-#on:
-#  repository_dispatch:
-#    types: [publish-image]
-
 on:
-  workflow_dispatch:
+  repository_dispatch:
+    types: [publish-image]
 
 permissions:
   packages: write
@@ -44,7 +41,7 @@ jobs:
           echo "Waiting...."
           sleep 1
         done
-    # -v /home/garou/sandbox/javascript:/javascript:rw \
+
     - name: Start Sysdig
       run: |      
         docker run --rm -d --name sysdig --privileged \
