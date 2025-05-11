@@ -74,6 +74,7 @@ jobs:
       - trigger-sca
       - trigger-sast
       - trigger-dast
+      - trigger-yara
       - trigger-iac
     runs-on: ubuntu-latest
     steps:
