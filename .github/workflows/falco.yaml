@@ -51,6 +51,7 @@ jobs:
           -v /lib/modules:/host/lib/modules:ro \
           -v /usr:/host/usr:ro \
           -v /tmp:/tmp \
+          -v ${{ github.workspace }}:/javascript:rw \
           --net=host sysdig/sysdig:latest sysdig --modern-bpf -w /tmp/capture.scap --snaplen=256 "not evt.type in (switch)"
 
         for i in {1..30}; do
