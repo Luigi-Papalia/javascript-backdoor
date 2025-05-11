@@ -1,4 +1,4 @@
-name: Meta Security Pipeline
+name: Full pipeline (no forensic analysis tools)
 
 on:
   workflow_dispatch:
