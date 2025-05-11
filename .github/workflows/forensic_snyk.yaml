@@ -37,7 +37,7 @@ jobs:
         shell: bash
 
       - name: Upload forensic snapshot
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: forensic-snapshot-${{ github.run_id }}
           path: forensic/
