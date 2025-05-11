@@ -27,6 +27,11 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Install dependencies
+        run: |
+          echo "=== npm install $(date --iso-8601=seconds) ===" | tee workflow.log
+          npm install 2>&1 | tee -a workflow.log
+      
       - name: Forensic snapshot
         run: |
           mkdir -p forensic
@@ -41,11 +46,6 @@ jobs:
         with:
           name: forensic-snapshot-${{ github.run_id }}
           path: forensic/
-
-      - name: Install dependencies
-        run: |
-          echo "=== npm install $(date --iso-8601=seconds) ===" | tee workflow.log
-          npm install 2>&1 | tee -a workflow.log
 
       - name: Upload install logs
         uses: actions/upload-artifact@v4
