@@ -38,7 +38,7 @@ jobs:
           uname -a > forensic/os.txt
           npm ls --all > forensic/npm-packages.txt
           env > forensic/env.txt
-          find . -type f -exec sha256sum {} \; > forensic/checksums.txt
+          find . -type f -not -path "*/node_modules/*" -not -path "*/.git/*" -exec sha256sum {} \; > forensic/checksums.txt
         shell: bash
 
       - name: Upload forensic snapshot
