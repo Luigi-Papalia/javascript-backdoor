@@ -1,8 +1,11 @@
 name: Publish Image (With Falco)
 
+#on:
+#  repository_dispatch:
+#    types: [publish-image]
+
 on:
-  repository_dispatch:
-    types: [publish-image]
+  workflow_dispatch:
 
 permissions:
   packages: write
