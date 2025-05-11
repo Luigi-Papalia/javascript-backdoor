@@ -25,7 +25,6 @@ This repository contains a deliberately insecure Node.js microservice, intended 
 - In-memory SQLite database with test users
 - Login form (no session management)
 - Vulnerable endpoints for XSS and code injection demonstration
-- Serves static files from `/`
 - Dockerfile and Kubernetes deployment YAML included
 
 ---
@@ -101,7 +100,7 @@ Access the service at `NodeIP:30000`.
 
 ---
 
-## API Endpoints (Detailed)
+## API Endpoints
 
 | Endpoint | Method | Description |
 | :-- | :-- | :-- |
@@ -110,7 +109,6 @@ Access the service at `NodeIP:30000`.
 | `/greet` | GET | Greets user by `name` parameter. **Vulnerable to reflected XSS.** |
 | `/calculate` | GET | Evaluates the `expr` query parameter as JS. **Vulnerable to code injection.** |
 | `/robots.txt` | GET | Returns the robots.txt file, for DAST purposes. |
-| `/public/*` | GET | Serves static files from the `public/` directory. |
 
 ### `/` (GET)
 
@@ -210,21 +208,6 @@ curl http://localhost:3000/robots.txt
 User-agent: *
 Disallow:
 ```
-
-
----
-
-### `/public/*` (GET)
-
-- **Description:** Serves static files from the `public/` directory.
-- **Usage:**
-
-```
-curl http://localhost:3000/public/example.txt
-```
-
-- **Response:**
-Contents of the requested static file.
 
 ---
 
