@@ -2,7 +2,7 @@
 
 - rule: JS Sandbox Container Write
   desc: >
-    Detect any write‑open to files inside "/home/runner/work/javascript-backdoor/javascript-backdoor" within a container, excluding "node_modules" and "package-lock.json".
+    Detect any write-open to files inside a folder within a container.
   condition: >
     open_write and
     container.id != host and
