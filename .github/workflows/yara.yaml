@@ -30,7 +30,7 @@ jobs:
           MATCHES=$(grep -v ".git" results.txt | wc -l)
           if [ "$MATCHES" -gt 0 ]; then
             echo "YARA scan detected obfuscated code!"
-            cat results.txt
+            grep -v ".git" results.txt
             exit 1
           else
             echo "No obfuscated code detected."
