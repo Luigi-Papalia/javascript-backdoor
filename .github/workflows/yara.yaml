@@ -19,9 +19,19 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y yara
 
-      - name: Run YARA scan (exclude .git folder)
+      - name: Run YARA scan and fail on match (excluding .git)
         id: scan
         run: |
-          yara -w -r yara_rules/base64_obfuscation.yar . > results.txt || true
+          yara -w -r yara_rules/base64_obfuscation.yar . > results.txt
           echo "Filtered YARA scan results (excluding .git):"
-          grep -v ".git" results.txt || echo "No matches found."
+          grep -v ".git" results.txt || true
+
+          # Check if any lines remain after filtering
+          MATCHES=$(grep -v ".git" results.txt | wc -l)
+          if [ "$MATCHES" -gt 0 ]; then
+            echo "YARA scan detected obfuscated code!"
+            cat results.txt
+            exit 1
+          else
+            echo "No obfuscated code detected."
+          fi
