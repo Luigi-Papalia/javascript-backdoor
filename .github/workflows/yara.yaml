@@ -23,8 +23,8 @@ jobs:
         id: scan
         run: |
           yara -w -r yara_rules/base64_obfuscation.yar . > results.txt
-          echo "Filtered YARA scan results (excluding .git):"
-          grep -v ".git" results.txt || true
+          # echo "Filtered YARA scan results (excluding .git):"
+          # grep -v ".git" results.txt || true
 
           # Check if any lines remain after filtering
           MATCHES=$(grep -v ".git" results.txt | wc -l)
