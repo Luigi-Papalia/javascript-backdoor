@@ -1,8 +1,9 @@
 name: YARA Obfuscation Scan
 
 on:
-  repository_dispatch:
-    types: [yara-scan]
+  workflow_dispatch:
+#  repository_dispatch:
+#    types: [yara-scan]
 
 jobs:
   yara-scan:
