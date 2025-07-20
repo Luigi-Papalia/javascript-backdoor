@@ -203,6 +203,271 @@ Uses Node.js 22, installs dependencies, exposes port 3000, and runs `server.js`.
 - **Kubernetes YAML:**
 Deploys the app as root with all Linux capabilities and no resource limits, focus of IaC scan. Exposes via NodePort 30000.
 
+Description of utility scripts
+
+---
+
+# `generate_sarif.py` - Convert Falco Alerts to SARIF Format
+
+This script converts a list of Falco JSON alerts into a [SARIF](https://docs.oasis-open.org/sarif/sarif/v2.1.0/sarif-v2.1.0.html) (Static Analysis Results Interchange Format) file, suitable for integration with security and code analysis tools like GitHub Advanced Security.
+
+---
+
+## Requirements
+
+* Python 3.6+
+* Input file containing **one JSON-formatted Falco alert per line**
+
+---
+
+## Usage
+
+```bash
+python generate_sarif.py <input_file> <output_file>
+```
+
+### Example
+
+```bash
+python generate_sarif.py falco_alerts.json alerts_output.sarif
+```
+
+---
+
+## Input
+
+* `input_file`: A text file where each line is a Falco alert in JSON format.
+* Each alert should resemble:
+
+  ```json
+  {
+    "time": "2025-07-20T10:32:00Z",
+    "rule": "Write below etc",
+    "priority": "Warning",
+    "output": "Write below etc: User root attempted to write to /etc/passwd",
+    "output_fields": {
+      "fd.name": "/etc/passwd",
+      "user.name": "root",
+      "user.uid": "0",
+      "proc.exepath": "/usr/bin/vim",
+      "proc.cmdline": "vim /etc/passwd"
+    },
+    "tags": ["filesystem", "write"]
+  }
+  ```
+
+---
+
+## Output
+
+* `output_file`: A [SARIF 2.1.0](https://json.schemastore.org/sarif-2.1.0.json) compliant JSON file.
+* Contains:
+
+  * Tool metadata (name: `Falco`)
+  * Unique rules derived from Falco `rule`
+  * Results with:
+
+    * Message from `output`
+    * Rule ID and severity (`priority`)
+    * Location (`fd.name`)
+    * Metadata like user, uid, process executable, and command line
+
+---
+
+## Output Example
+
+```json
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Falco",
+          "rules": [
+            {
+              "id": "Write below etc",
+              "name": "Write below etc",
+              "shortDescription": {
+                "text": "Write below etc"
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": ["filesystem", "write"]
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "Write below etc",
+          "level": "warning",
+          "message": {
+            "text": "Write below etc: User root attempted to write to /etc/passwd"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "/etc/passwd"
+                }
+              }
+            }
+          ],
+          "properties": {
+            "eventTime": "2025-07-20T10:32:00Z",
+            "user": "root",
+            "uid": "0",
+            "process": {
+              "executable": "/usr/bin/vim",
+              "commandLine": "vim /etc/passwd"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+---
+
+## Error Handling
+
+* Malformed JSON lines will be reported to `stderr`, but the script continues.
+* File I/O errors or argument issues will halt the script with a message.
+
+---
+
+# `ioc_matcher.py` - IOC Scanner and MISP Correlator
+
+This script recursively scans files for Indicators of Compromise (IOCs) using [ioc-finder](https://github.com/InQuest/python-iocextract), and checks them against a MISP (Malware Information Sharing Platform) instance via the PyMISP API. Results are printed in human-readable **Markdown format**.
+
+---
+
+## Requirements
+
+### Python Dependencies
+
+You must install the following Python packages:
+
+```bash
+pip install pymisp ioc-finder requests
+```
+
+* [`pymisp`](https://github.com/MISP/PyMISP)
+* [`ioc-finder`](https://github.com/InQuest/python-iocextract)
+* `requests`
+* `urllib3`
+
+---
+
+## Usage
+
+```bash
+python ioc_matcher.py --input-folder <path_to_scan> \
+                      --misp-url <https://misp-instance> \
+                      --misp-key <your_api_key> \
+                      [--max-workers 8] \
+                      [--verify-cert true|false]
+```
+
+### Example
+
+```bash
+python ioc_matcher.py \
+  --input-folder ./my_project \
+  --misp-url https://misp.local \
+  --misp-key ABCDEFGH1234567890 \
+  --max-workers 4 \
+  --verify-cert false
+```
+
+---
+
+## Input
+
+* `--input-folder`: Directory to scan for IOCs (default: current folder).
+* Files with the following extensions are considered: `.txt`, `.js`, `.yaml`, `.json`, `.html`, `Dockerfile`.
+
+The script extracts IOCs like:
+
+* IP addresses
+* Domains
+* URLs
+* File hashes
+
+---
+
+## 📤 Output
+
+* Markdown report printed to standard output (`stdout`)
+* Includes:
+
+  * File and IOC matched
+  * MISP attribute details (value, type, tags, IDS flag)
+  * Related MISP event (ID, info, tags, threat level, distribution)
+
+---
+
+### Output Example
+
+```markdown
+# IOC Matcher Report
+Scanned directory: `./my_project` with `4` threads  
+
+- **Total unique possible IOCs extracted from repository:** 12  
+
+## :warning: Alert: Match found (file: `src/config.json`)
+
+- **IOC Value:** `1.2.3.4`
+- **IOC Type:** ip-dst  
+- **Category:** Network activity  
+- **To IDS:** True  
+- **Comment:** Malicious C2 server  
+- **Attribute Tags:** `APT`, `malware`
+
+### Event Details
+- **Event ID:** 1023
+- **Info:** C2 infrastructure for malware XYZ
+- **Date:** 2024-09-10
+- **Event Tags:** `APT`, `xyz-family`
+- **Threat Level:** 2
+- **Analysis:** 2
+- **Distribution:** 1
+- **Organization:** CERT-X
+```
+
+---
+
+## Internal Logic
+
+1. **IOC Extraction**
+
+   * Uses `ioc_finder.find_iocs(content)` to extract indicators from readable files.
+   * Filters out placeholder IPs like `0.0.0.0`.
+
+2. **MISP Querying**
+
+   * Efficient parallel search using `ThreadPoolExecutor`.
+   * All results cached per IOC to minimize redundant lookups.
+
+3. **Markdown Display**
+
+   * Results displayed using `print()` in Markdown format.
+
+---
+
+## Error Handling
+
+* If a file cannot be read (e.g., permission issues), it logs a warning and continues.
+* If a MISP query fails, it logs the error and skips the event.
+* If the `input-folder` does not exist, the script exits with an error.
+
 ---
 
 **Author:** Luigi Papalia
